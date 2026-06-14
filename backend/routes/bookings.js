@@ -18,57 +18,75 @@ router.post('/', protect, requireRole('user'), async (req, res) => {
   try {
     const booking = await Booking.create({ ...req.body, userId: req.user.id });
 
-    const Barber = require('../models/Barber');
-    const barber = await Barber.findById(booking.barberId);
-    const User = require('../models/User');
-
-    // Notify barber user via DB notification & Email
-    if (barber?.userId) {
-      await createNotification(
-        barber.userId,
-        `[BOOKED] New booking from ${req.user.name} on ${new Date(booking.date).toLocaleDateString()}`,
-        'booking_created',
-        '/barber/dashboard'
-      );
-      const barberUser = await User.findById(barber.userId).select('email name');
-      if (barberUser?.email) {
-        await sendMail({
-          to: barberUser.email,
-          subject: 'New Booking Request — BarberApp',
-          html: `<p>Hi ${barberUser.name}, you have a new booking request for <b>${booking.service}</b> on <b>${new Date(booking.date).toLocaleDateString()}</b> at <b>${booking.timeSlot}</b> from customer <b>${req.user.name}</b>.</p>`,
-        });
-      }
-    }
-
-    // Notify Shop Owner via DB notification & Email
-    const Salon = require('../models/Salon');
-    const salon = await Salon.findById(booking.salonId);
-    if (salon?.ownerId) {
-      await createNotification(
-        salon.ownerId,
-        `[BOOKED] New booking at ${salon.name} for ${barber?.name} on ${new Date(booking.date).toLocaleDateString()}`,
-        'booking_created',
-        '/shop/dashboard'
-      );
-      const ownerUser = await User.findById(salon.ownerId).select('email name');
-      if (ownerUser?.email) {
-        await sendMail({
-          to: ownerUser.email,
-          subject: 'New Salon Booking — BarberApp',
-          html: `<p>Hi ${ownerUser.name}, a new booking has been made at <b>${salon.name}</b> for barber <b>${barber?.name || 'Staff'}</b> on <b>${new Date(booking.date).toLocaleDateString()}</b> at <b>${booking.timeSlot}</b>.</p>`,
-        });
-      }
-    }
-
-    // Email receipt to user while the booking is pending review
-    const user = await User.findById(req.user.id).select('email name');
-    await sendMail({
-      to: user.email,
-      subject: 'Booking Received — BarberApp',
-      html: `<p>Hi ${user.name}, your booking for <b>${booking.service}</b> on <b>${new Date(booking.date).toLocaleDateString()}</b> at <b>${booking.timeSlot}</b> has been received and is currently <b>pending review</b>.</p>`,
-    });
-
+    // ✅ Respond immediately — booking is saved, don't let emails block the response
     res.status(201).json(booking);
+
+    // 🔔 Send all notifications & emails in the background (fire-and-forget).
+    // The mailer has built-in retries (3 attempts + exponential backoff)
+    // so emails ARE reliably delivered even if the first attempt fails.
+    const userName = req.user.name;
+    const userId = req.user.id;
+
+    (async () => {
+      try {
+        const Barber = require('../models/Barber');
+        const Salon = require('../models/Salon');
+        const barber = await Barber.findById(booking.barberId);
+        const dateStr = new Date(booking.date).toLocaleDateString();
+
+        // 1. Notify barber (DB notification + Email)
+        if (barber?.userId) {
+          await createNotification(
+            barber.userId,
+            `[BOOKED] New booking from ${userName} on ${dateStr}`,
+            'booking_created',
+            '/barber/dashboard'
+          );
+          const barberUser = await User.findById(barber.userId).select('email name');
+          if (barberUser?.email) {
+            await sendMail({
+              to: barberUser.email,
+              subject: 'New Booking Request — Balor',
+              html: `<p>Hi ${barberUser.name}, you have a new booking request for <b>${booking.service}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> from customer <b>${userName}</b>.</p>`,
+            });
+          }
+        }
+
+        // 2. Notify Shop Owner (DB notification + Email)
+        const salon = await Salon.findById(booking.salonId);
+        if (salon?.ownerId) {
+          await createNotification(
+            salon.ownerId,
+            `[BOOKED] New booking at ${salon.name} for ${barber?.name} on ${dateStr}`,
+            'booking_created',
+            '/shop/dashboard'
+          );
+          const ownerUser = await User.findById(salon.ownerId).select('email name');
+          if (ownerUser?.email) {
+            await sendMail({
+              to: ownerUser.email,
+              subject: 'New Salon Booking — Balor',
+              html: `<p>Hi ${ownerUser.name}, a new booking has been made at <b>${salon.name}</b> for barber <b>${barber?.name || 'Staff'}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b>.</p>`,
+            });
+          }
+        }
+
+        // 3. Email receipt to customer
+        const user = await User.findById(userId).select('email name');
+        if (user?.email) {
+          await sendMail({
+            to: user.email,
+            subject: 'Booking Received — Balor',
+            html: `<p>Hi ${user.name}, your booking for <b>${booking.service}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> has been received and is currently <b>pending review</b>.</p>`,
+          });
+        }
+
+        console.log(`[BOOKING] ✅ All notifications sent for booking ${booking._id}`);
+      } catch (bgErr) {
+        console.error(`[BOOKING] ❌ Background notification error for booking ${booking._id}:`, bgErr.message);
+      }
+    })();
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -111,6 +111,7 @@ export default function BookingForm() {
       setSuccess('Booking submitted! The barber will review your request shortly.');
     } catch (err) {
       setError(err.response?.data?.message || 'Booking failed');
+    } finally {
       setBookingLoading(false);
     }
   };
