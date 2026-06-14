@@ -3,7 +3,7 @@ const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
 const { protect, requireRole } = require('../middleware/auth');
 const User = require('../models/User');
-const { sendMail } = require('../utils/mailer');
+const { sendMail, sendMailBackground } = require('../utils/mailer');
 const { notifyBookingStatusChange } = require('../utils/bookingAlerts');
 const Waitlist = require('../models/Waitlist');
 
@@ -22,8 +22,6 @@ router.post('/', protect, requireRole('user'), async (req, res) => {
     res.status(201).json(booking);
 
     // 🔔 Send all notifications & emails in the background (fire-and-forget).
-    // The mailer has built-in retries (3 attempts + exponential backoff)
-    // so emails ARE reliably delivered even if the first attempt fails.
     const userName = req.user.name;
     const userId = req.user.id;
 
@@ -44,7 +42,7 @@ router.post('/', protect, requireRole('user'), async (req, res) => {
           );
           const barberUser = await User.findById(barber.userId).select('email name');
           if (barberUser?.email) {
-            await sendMail({
+            sendMailBackground({
               to: barberUser.email,
               subject: 'New Booking Request — Balor',
               html: `<p>Hi ${barberUser.name}, you have a new booking request for <b>${booking.service}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> from customer <b>${userName}</b>.</p>`,
@@ -63,7 +61,7 @@ router.post('/', protect, requireRole('user'), async (req, res) => {
           );
           const ownerUser = await User.findById(salon.ownerId).select('email name');
           if (ownerUser?.email) {
-            await sendMail({
+            sendMailBackground({
               to: ownerUser.email,
               subject: 'New Salon Booking — Balor',
               html: `<p>Hi ${ownerUser.name}, a new booking has been made at <b>${salon.name}</b> for barber <b>${barber?.name || 'Staff'}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b>.</p>`,
@@ -74,14 +72,14 @@ router.post('/', protect, requireRole('user'), async (req, res) => {
         // 3. Email receipt to customer
         const user = await User.findById(userId).select('email name');
         if (user?.email) {
-          await sendMail({
+          sendMailBackground({
             to: user.email,
             subject: 'Booking Received — Balor',
             html: `<p>Hi ${user.name}, your booking for <b>${booking.service}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> has been received and is currently <b>pending review</b>.</p>`,
           });
         }
 
-        console.log(`[BOOKING] ✅ All notifications sent for booking ${booking._id}`);
+        console.log(`[BOOKING] ✅ All notifications queued for booking ${booking._id}`);
       } catch (bgErr) {
         console.error(`[BOOKING] ❌ Background notification error for booking ${booking._id}:`, bgErr.message);
       }
@@ -175,69 +173,81 @@ router.patch('/:id/cancel', protect, requireRole('user'), async (req, res) => {
     booking.cancelledBy = 'customer';
     booking.cancelReason = cancelReason.trim();
     await booking.save();
-    await notifyBookingStatusChange(booking, 'cancelled');
 
-    const Barber = require('../models/Barber');
-    const barber = await Barber.findById(booking.barberId);
-    const User = require('../models/User');
-
-    // Notify Barber of cancellation
-    if (barber?.userId) {
-      await createNotification(
-        barber.userId,
-        `[CANCELLED] Booking cancelled by ${req.user.name} on ${new Date(booking.date).toLocaleDateString()} (Reason: ${booking.cancelReason})`,
-        'booking_cancelled',
-        '/barber/dashboard'
-      );
-      const barberUser = await User.findById(barber.userId).select('email name');
-      if (barberUser?.email) {
-        await sendMail({
-          to: barberUser.email,
-          subject: 'Booking Cancelled by Customer — Balor',
-          html: `<p>Hi ${barberUser.name}, the booking for <b>${booking.service}</b> on <b>${new Date(booking.date).toLocaleDateString()}</b> at <b>${booking.timeSlot}</b> has been cancelled by customer <b>${req.user.name}</b>.</p><p><b>Reason:</b> ${booking.cancelReason}</p>`,
-        });
-      }
-    }
-
-    // Notify Shop Owner of cancellation
-    const Salon = require('../models/Salon');
-    const salon = await Salon.findById(booking.salonId);
-    if (salon?.ownerId) {
-      await createNotification(
-        salon.ownerId,
-        `[CANCELLED] Booking cancelled at ${salon.name} for ${barber?.name} on ${new Date(booking.date).toLocaleDateString()} (Reason: ${booking.cancelReason})`,
-        'booking_cancelled',
-        '/shop/dashboard'
-      );
-      const ownerUser = await User.findById(salon.ownerId).select('email name');
-      if (ownerUser?.email) {
-        await sendMail({
-          to: ownerUser.email,
-          subject: 'Salon Booking Cancelled — Balor',
-          html: `<p>Hi ${ownerUser.name}, the booking at <b>${salon.name}</b> for barber <b>${barber?.name || 'Staff'}</b> on <b>${new Date(booking.date).toLocaleDateString()}</b> at <b>${booking.timeSlot}</b> has been cancelled by customer <b>${req.user.name}</b>.</p><p><b>Reason:</b> ${booking.cancelReason}</p>`,
-        });
-      }
-    }
-
-    // Notify waitlist
-    const waitlisted = await Waitlist.find({
-      barberId: booking.barberId,
-      date: booking.date,
-      status: 'pending'
-    }).populate('userId');
-
-    for (const entry of waitlisted) {
-      entry.status = 'notified';
-      await entry.save();
-      await createNotification(entry.userId._id, `A slot opened up on ${new Date(booking.date).toLocaleDateString()}! Book now before it's gone.`, 'waitlist', '/my-bookings');
-      await sendMail({
-        to: entry.userId.email,
-        subject: 'Waitlist Alert — Balor',
-        html: `<p>Hi ${entry.userId.name}, a slot just opened up for your waitlisted date: <b>${new Date(booking.date).toLocaleDateString()}</b>.</p><p>Hurry to the app to book it!</p>`
-      });
-    }
-
+    // ✅ Respond immediately
     res.json(booking);
+
+    // 🔔 All notifications & emails in background
+    const userName = req.user.name;
+    (async () => {
+      try {
+        // Notify customer via bookingAlerts (already uses sendMailBackground)
+        await notifyBookingStatusChange(booking, 'cancelled');
+
+        const Barber = require('../models/Barber');
+        const barber = await Barber.findById(booking.barberId);
+        const dateStr = new Date(booking.date).toLocaleDateString();
+
+        // Notify Barber
+        if (barber?.userId) {
+          await createNotification(
+            barber.userId,
+            `[CANCELLED] Booking cancelled by ${userName} on ${dateStr} (Reason: ${booking.cancelReason})`,
+            'booking_cancelled',
+            '/barber/dashboard'
+          );
+          const barberUser = await User.findById(barber.userId).select('email name');
+          if (barberUser?.email) {
+            sendMailBackground({
+              to: barberUser.email,
+              subject: 'Booking Cancelled by Customer — Balor',
+              html: `<p>Hi ${barberUser.name}, the booking for <b>${booking.service}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> has been cancelled by customer <b>${userName}</b>.</p><p><b>Reason:</b> ${booking.cancelReason}</p>`,
+            });
+          }
+        }
+
+        // Notify Shop Owner
+        const Salon = require('../models/Salon');
+        const salon = await Salon.findById(booking.salonId);
+        if (salon?.ownerId) {
+          await createNotification(
+            salon.ownerId,
+            `[CANCELLED] Booking cancelled at ${salon.name} for ${barber?.name} on ${dateStr} (Reason: ${booking.cancelReason})`,
+            'booking_cancelled',
+            '/shop/dashboard'
+          );
+          const ownerUser = await User.findById(salon.ownerId).select('email name');
+          if (ownerUser?.email) {
+            sendMailBackground({
+              to: ownerUser.email,
+              subject: 'Salon Booking Cancelled — Balor',
+              html: `<p>Hi ${ownerUser.name}, the booking at <b>${salon.name}</b> for barber <b>${barber?.name || 'Staff'}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> has been cancelled by customer <b>${userName}</b>.</p><p><b>Reason:</b> ${booking.cancelReason}</p>`,
+            });
+          }
+        }
+
+        // Notify waitlist
+        const waitlisted = await Waitlist.find({
+          barberId: booking.barberId,
+          date: booking.date,
+          status: 'pending'
+        }).populate('userId');
+
+        for (const entry of waitlisted) {
+          entry.status = 'notified';
+          await entry.save();
+          await createNotification(entry.userId._id, `A slot opened up on ${dateStr}! Book now before it's gone.`, 'waitlist', '/my-bookings');
+          sendMailBackground({
+            to: entry.userId.email,
+            subject: 'Waitlist Alert — Balor',
+            html: `<p>Hi ${entry.userId.name}, a slot just opened up for your waitlisted date: <b>${dateStr}</b>.</p><p>Hurry to the app to book it!</p>`
+          });
+        }
+      } catch (bgErr) {
+        console.error('[BOOKING] Cancel notification error:', bgErr.message);
+      }
+    })();
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -265,29 +275,37 @@ router.patch('/:id/status', protect, requireRole('barber', 'admin'), async (req,
     }
     await booking.save();
 
-    await notifyBookingStatusChange(booking, status);
-
-    if (status === 'cancelled') {
-      // Notify waitlist
-      const waitlisted = await Waitlist.find({
-        barberId: booking.barberId,
-        date: booking.date,
-        status: 'pending'
-      }).populate('userId');
-
-      for (const entry of waitlisted) {
-        entry.status = 'notified';
-        await entry.save();
-        await createNotification(entry.userId._id, `A slot opened up on ${new Date(booking.date).toLocaleDateString()}! Book now before it's gone.`, 'waitlist', '/my-bookings');
-        await sendMail({
-          to: entry.userId.email,
-          subject: 'Waitlist Alert — Balor',
-          html: `<p>Hi ${entry.userId.name}, a slot just opened up for your waitlisted date: <b>${new Date(booking.date).toLocaleDateString()}</b>.</p><p>Hurry to the app to book it!</p>`
-        });
-      }
-    }
-
+    // ✅ Respond immediately
     res.json(booking);
+
+    // 🔔 Notifications in background (notifyBookingStatusChange already uses sendMailBackground)
+    (async () => {
+      try {
+        await notifyBookingStatusChange(booking, status);
+
+        if (status === 'cancelled') {
+          const waitlisted = await Waitlist.find({
+            barberId: booking.barberId,
+            date: booking.date,
+            status: 'pending'
+          }).populate('userId');
+
+          for (const entry of waitlisted) {
+            entry.status = 'notified';
+            await entry.save();
+            await createNotification(entry.userId._id, `A slot opened up on ${new Date(booking.date).toLocaleDateString()}! Book now before it's gone.`, 'waitlist', '/my-bookings');
+            sendMailBackground({
+              to: entry.userId.email,
+              subject: 'Waitlist Alert — Balor',
+              html: `<p>Hi ${entry.userId.name}, a slot just opened up for your waitlisted date: <b>${new Date(booking.date).toLocaleDateString()}</b>.</p><p>Hurry to the app to book it!</p>`
+            });
+          }
+        }
+      } catch (bgErr) {
+        console.error('[BOOKING] Status update notification error:', bgErr.message);
+      }
+    })();
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -296,9 +314,6 @@ router.patch('/:id/status', protect, requireRole('barber', 'admin'), async (req,
 // POST /api/bookings/:id/send-completion-otp  — send completion OTP to customer
 router.post('/:id/send-completion-otp', protect, requireRole('barber', 'shop', 'admin'), async (req, res) => {
   try {
-    const Barber = require('../models/Barber');
-    const Salon = require('../models/Salon');
-
     const booking = await Booking.findById(req.params.id)
       .populate('userId', 'email name')
       .populate('barberId', 'name')
@@ -311,28 +326,39 @@ router.post('/:id/send-completion-otp', protect, requireRole('barber', 'shop', '
     booking.completionOtp = otp;
     await booking.save();
 
+    // ✅ Respond immediately — OTP is saved in DB
+    res.json({ success: true, message: 'OTP sent to customer' });
+
+    // 🔔 Send OTP email in background (with retries for reliable delivery)
     if (booking.userId?.email) {
-      await sendMail({
-        to: booking.userId.email,
-        subject: 'Service Completion OTP — Balor',
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-            <h2 style="color:#e94560">&#9986; Balor</h2>
-            <p>Hi <strong>${booking.userId.name}</strong>,</p>
-            <p>Your service with barber <strong>${booking.barberId?.name || 'Staff'}</strong> at <strong>${booking.salonId?.name || 'our salon'}</strong> is almost complete!</p>
-            <p>Please share the 4-digit OTP below with the salon to confirm the completion of your service:</p>
-            <div style="text-align:center;margin:24px 0">
-              <span style="font-size:2rem;font-weight:900;letter-spacing:0.18em;color:#111;background:#f4f4f4;padding:12px 24px;border-radius:10px;display:inline-block">${otp}</span>
-            </div>
-            <p style="color:#666;font-size:0.9rem">If you are not at the salon right now, do not share this OTP.</p>
-            <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-            <p style="color:#aaa;font-size:0.8rem">&copy; ${new Date().getFullYear()} Balor &mdash; Smart Grooming & Salon Platform</p>
-          </div>
-        `,
-      });
+      // For completion OTP, we use sendMail (with await + retries) in a background task
+      // because OTP delivery is critical — customer needs it to verify completion
+      (async () => {
+        try {
+          await sendMail({
+            to: booking.userId.email,
+            subject: 'Service Completion OTP — Balor',
+            html: `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+                <h2 style="color:#e94560">&#9986; Balor</h2>
+                <p>Hi <strong>${booking.userId.name}</strong>,</p>
+                <p>Your service with barber <strong>${booking.barberId?.name || 'Staff'}</strong> at <strong>${booking.salonId?.name || 'our salon'}</strong> is almost complete!</p>
+                <p>Please share the 4-digit OTP below with the salon to confirm the completion of your service:</p>
+                <div style="text-align:center;margin:24px 0">
+                  <span style="font-size:2rem;font-weight:900;letter-spacing:0.18em;color:#111;background:#f4f4f4;padding:12px 24px;border-radius:10px;display:inline-block">${otp}</span>
+                </div>
+                <p style="color:#666;font-size:0.9rem">If you are not at the salon right now, do not share this OTP.</p>
+                <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+                <p style="color:#aaa;font-size:0.8rem">&copy; ${new Date().getFullYear()} Balor &mdash; Smart Grooming & Salon Platform</p>
+              </div>
+            `,
+          });
+        } catch (bgErr) {
+          console.error('[BOOKING] Completion OTP email error:', bgErr.message);
+        }
+      })();
     }
 
-    res.json({ success: true, message: 'OTP sent to customer' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

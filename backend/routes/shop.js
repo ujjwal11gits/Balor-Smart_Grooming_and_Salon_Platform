@@ -108,8 +108,15 @@ router.patch('/bookings/:id/status', ...guard, async (req, res) => {
       }
     }
     await booking.save();
-    await notifyBookingStatusChange(booking, status);
+
+    // ✅ Respond immediately — status is saved
     res.json(booking);
+
+    // 🔔 Send notification email in the background (notifyBookingStatusChange uses sendMailBackground)
+    notifyBookingStatusChange(booking, status).catch((err) => {
+      console.error('[SHOP] Status notification error:', err.message);
+    });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
