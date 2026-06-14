@@ -1,0 +1,22 @@
+# Ignore node modules in all directories
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Ignore local environment credentials and secrets
+.env
+backend/.env
+frontend/.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore build outputs (Vercel builds frontend in the cloud)
+dist/
+frontend/dist/
+
+# Ignore operating system files
+.DS_Store
+Thumbs.db
+.vscode/
