@@ -130,6 +130,60 @@ export default function SalonDetail() {
         </div>
       </div>
 
+      {/* Services & Pricing */}
+      {salon.services && salon.services.length > 0 && (
+        <div className="card" style={{ padding: '22px 24px', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <span style={{ fontSize: '1.15rem' }}>💈</span>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)' }}>Services & Pricing</h3>
+            <span style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'var(--text3)', fontWeight: 500 }}>
+              {salon.services.length} {salon.services.length === 1 ? 'service' : 'services'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {salon.services.map((s, i) => {
+              const icons = { 'Haircut': '✂️', 'Beard Trim': '🪒', 'Beard Shave': '🪒', 'Hair Color': '🎨', 'Hot Towel Shave': '🔥', 'Keratin Treatment': '💆', 'Fade Cut': '💈', 'Spa': '🧖', 'Shampoo': '🧴', 'Massage': '💆‍♂️' };
+              const icon = icons[s.name] || '✨';
+              return (
+                <div
+                  key={s.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 4px',
+                    borderBottom: i < salon.services.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '1.2rem', width: '28px', textAlign: 'center' }}>{icon}</span>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text)' }}>{s.name}</div>
+                      {s.duration && (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text3)', marginTop: '2px' }}>
+                          🕐 {s.duration} mins
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{
+                    fontWeight: 800,
+                    fontSize: '1rem',
+                    color: 'var(--accent)',
+                    background: 'rgba(233,69,96,0.06)',
+                    padding: '4px 12px',
+                    borderRadius: '8px',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    ₹{s.price}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Barbers section */}
       <div style={{ marginBottom: '16px' }}>
         <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Our Barbers</h3>
