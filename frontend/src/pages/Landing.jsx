@@ -51,11 +51,49 @@ const TESTIMONIALS = [
   { name: 'Arjun Das', role: 'Regular Customer', avatar: 'https://randomuser.me/api/portraits/men/36.jpg', text: 'Found an amazing barbershop near my office. The booking experience is smooth and the app looks great.' },
 ];
 
+const FAQ_CATEGORIES = {
+  customer: [
+    {
+      q: "How do I book an appointment?",
+      a: "Simply sign in or register for a free account, browse nearby salons on the Salons page, pick your preferred barber, select a service with optional add-ons, and choose an available time slot. Your booking is confirmed instantly!"
+    },
+    {
+      q: "Can I cancel or reschedule my booking?",
+      a: "Yes! You can reschedule or cancel any appointment free of charge up to 2 hours before your scheduled slot. Just visit your 'My Bookings' tab in your dashboard."
+    },
+    {
+      q: "How do I select a specific barber?",
+      a: "When browsing a salon, you will see a list of all active barbers along with their specialties, ratings, and profiles. You can choose your favorite barber, or select 'Any Barber' if you want the first available opening."
+    },
+    {
+      q: "Is payment processed online or at the shop?",
+      a: "Bookings on Balor are free to make online. You pay directly at the shop after your service is completed. Our partner salons accept cash, credit/debit cards, and digital wallets."
+    }
+  ],
+  business: [
+    {
+      q: "How can I register my salon on Balor?",
+      a: "Click 'Register your Salon' in the footer or choose 'Salon Owner' during sign-up. Provide your shop name, location, and business hours. Once verified, you can immediately set up services and invite your barbers."
+    },
+    {
+      q: "How do barbers manage schedules and shifts?",
+      a: "Each barber gets a personal login to view their calendar, define their shift hours, and toggle their real-time availability. Owners can also manage schedules for the entire team from the Shop Dashboard."
+    },
+    {
+      q: "Are there any setup or monthly subscription fees?",
+      a: "Balor offers a generous free tier that includes core scheduling, barber management, and client notifications. We have premium add-ons for advanced marketing and detailed analytics, but there are no setup or monthly fees to start."
+    }
+  ]
+};
+
 export default function LandingPage() {
   const { auth } = useAuth();
   const [slide, setSlide] = useState(0);
   const [animating, setAnimating] = useState(false);
   const timerRef = useRef(null);
+
+  const [faqTab, setFaqTab] = useState('customer');
+  const [activeFaq, setActiveFaq] = useState(null);
 
   const [footerRating, setFooterRating] = useState(0);
   const [footerHoverRating, setFooterHoverRating] = useState(0);
@@ -274,6 +312,57 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ Section ────────────────────────────────────────── */}
+      <section style={{ ...section, borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+        <div style={container}>
+          <div style={sectionHeader}>
+            <span style={sectionTag}>FAQ</span>
+            <h2 style={sectionTitle}>Frequently Asked Questions</h2>
+            <p style={sectionSub}>Got questions? We've got answers. Select a category below to find what you need.</p>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div className="faq-tabs-container">
+              <button
+                className={`faq-tab-btn ${faqTab === 'customer' ? 'active' : ''}`}
+                onClick={() => { setFaqTab('customer'); setActiveFaq(null); }}
+              >
+                For Customers
+              </button>
+              <button
+                className={`faq-tab-btn ${faqTab === 'business' ? 'active' : ''}`}
+                onClick={() => { setFaqTab('business'); setActiveFaq(null); }}
+              >
+                For Salons & Barbers
+              </button>
+            </div>
+          </div>
+
+          <div className="faq-accordion">
+            {FAQ_CATEGORIES[faqTab].map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <div key={index} className={`faq-item ${isOpen ? 'open' : ''}`}>
+                  <button
+                    className="faq-trigger"
+                    onClick={() => setActiveFaq(isOpen ? null : index)}
+                    aria-expanded={isOpen}
+                  >
+                    <span>{faq.q}</span>
+                    <span className="faq-chevron">▼</span>
+                  </button>
+                  <div className="faq-answer-wrapper">
+                    <div className="faq-answer-content">
+                      <p>{faq.a}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
