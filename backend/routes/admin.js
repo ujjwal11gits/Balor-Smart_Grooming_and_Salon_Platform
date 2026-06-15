@@ -3,7 +3,6 @@ const User = require('../models/User');
 const Booking = require('../models/Booking');
 const Barber = require('../models/Barber');
 const Salon = require('../models/Salon');
-const Feedback = require('../models/Feedback');
 const { protect, requireRole } = require('../middleware/auth');
 const { notifyBookingStatusChange } = require('../utils/bookingAlerts');
 
@@ -12,12 +11,11 @@ const guard = [protect, requireRole('admin')];
 // GET /api/admin/stats
 router.get('/stats', ...guard, async (req, res) => {
   try {
-    const [totalBookings, totalUsers, totalSalons, totalBarbers, pendingFeedbackCount] = await Promise.all([
+    const [totalBookings, totalUsers, totalSalons, totalBarbers] = await Promise.all([
       Booking.countDocuments(),
       User.countDocuments(),
       Salon.countDocuments(),
       Barber.countDocuments(),
-      Feedback.countDocuments({ status: 'pending' }),
     ]);
 
     const revenueAgg = await Booking.aggregate([
@@ -56,7 +54,6 @@ router.get('/stats', ...guard, async (req, res) => {
       statusCounts,
       bookingsPerDay: perDay,
       topBarbers,
-      pendingFeedbackCount,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -181,71 +178,6 @@ router.get('/shop-owners', ...guard, async (req, res) => {
   try {
     const owners = await User.find({ role: 'shop' }).select('name email');
     res.json(owners);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET /api/admin/feedback?page=1&limit=10&type=...&status=...
-router.get('/feedback', ...guard, async (req, res) => {
-  try {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, parseInt(req.query.limit) || 10);
-    const { type, status } = req.query;
-
-    let query = {};
-    if (type && ['bug', 'suggestion', 'other'].includes(type)) {
-      query.type = type;
-    }
-    if (status && ['pending', 'reviewed', 'resolved'].includes(status)) {
-      query.status = status;
-    }
-
-    const total = await Feedback.countDocuments(query);
-    const feedback = await Feedback.find(query)
-      .populate('userId', 'name email role')
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    res.json({ feedback, total, page, pages: Math.ceil(total / limit) });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// PATCH /api/admin/feedback/:id/status
-router.patch('/feedback/:id/status', ...guard, async (req, res) => {
-  try {
-    const { status } = req.body;
-    if (!['pending', 'reviewed', 'resolved'].includes(status)) {
-      return res.status(400).json({ message: 'Invalid feedback status.' });
-    }
-
-    const feedback = await Feedback.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).populate('userId', 'name email role');
-
-    if (!feedback) {
-      return res.status(404).json({ message: 'Feedback not found.' });
-    }
-
-    res.json(feedback);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// DELETE /api/admin/feedback/:id
-router.delete('/feedback/:id', ...guard, async (req, res) => {
-  try {
-    const feedback = await Feedback.findByIdAndDelete(req.params.id);
-    if (!feedback) {
-      return res.status(404).json({ message: 'Feedback not found.' });
-    }
-    res.json({ message: 'Feedback deleted successfully.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

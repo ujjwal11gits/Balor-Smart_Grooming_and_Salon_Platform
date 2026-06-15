@@ -48,7 +48,6 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/waitlist', require('./routes/waitlist'));
-app.use('/api/feedback', require('./routes/feedback'));
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {

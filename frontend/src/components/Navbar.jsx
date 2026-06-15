@@ -11,9 +11,6 @@ export default function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password');
-  const showFeedback = !!auth || isAuthPage;
-
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
@@ -121,18 +118,6 @@ export default function Navbar() {
           )}
           {auth?.role === 'shop' && (
             <MobileNavLink to="/shop/dashboard" active={isActive('/shop/dashboard')} onClick={() => setMenuOpen(false)}>My Dashboard</MobileNavLink>
-          )}
-
-          {showFeedback && (
-            <button 
-              onClick={() => {
-                setMenuOpen(false);
-                window.dispatchEvent(new Event('open-feedback-drawer'));
-              }}
-              className="drawer-feedback-btn"
-            >
-              <span>🪲</span> Report an Issue
-            </button>
           )}
 
           {auth ? (
@@ -315,30 +300,6 @@ export default function Navbar() {
         }
         .drawer-register-btn:hover {
           background: var(--accent-hover);
-        }
-
-        .drawer-feedback-btn {
-          width: 100%;
-          background: rgba(233,69,96,0.05);
-          color: var(--text);
-          border: 1px dashed rgba(233,69,96,0.3);
-          padding: 12px 14px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 0.95rem;
-          font-weight: 600;
-          font-family: inherit;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          transition: all 0.2s;
-          margin-top: 10px;
-          box-sizing: border-box;
-        }
-        .drawer-feedback-btn:hover {
-          background: rgba(233,69,96,0.1);
-          border-color: var(--accent);
-          color: var(--accent);
         }
 
         .drawer-backdrop {

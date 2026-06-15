@@ -677,265 +677,6 @@ function UsersTab() {
   );
 }
 
-// ── Feedback Tab ──────────────────────────────────────────
-function FeedbackTabContent({ onStatusUpdated }) {
-  const [feedback, setFeedback] = useState([]);
-  const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [expandedId, setExpandedId] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, id: null });
-
-  const fetchFeedback = async (p = 1) => {
-    setLoading(true);
-    try {
-      const { data } = await api.get('/admin/feedback', {
-        params: {
-          page: p,
-          limit: 10,
-          type: typeFilter || undefined,
-          status: statusFilter || undefined
-        }
-      });
-      setFeedback(data.feedback);
-      setPages(data.pages);
-      setPage(p);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFeedback(1);
-  }, [typeFilter, statusFilter]);
-
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      const oldItem = feedback.find(f => f._id === id);
-      const { data } = await api.patch(`/admin/feedback/${id}/status`, { status: newStatus });
-      setFeedback(feedback.map(f => f._id === id ? data : f));
-      if (oldItem && oldItem.status === 'pending' && newStatus !== 'pending' && onStatusUpdated) {
-        onStatusUpdated();
-      }
-    } catch (err) {
-      console.error('Failed to update status', err);
-    }
-  };
-
-  const handleDeleteClick = (id) => {
-    setConfirmDelete({ isOpen: true, id });
-  };
-
-  const handleConfirmDelete = async () => {
-    const id = confirmDelete.id;
-    const itemToDelete = feedback.find(f => f._id === id);
-    setConfirmDelete({ isOpen: false, id: null });
-    try {
-      await api.delete(`/admin/feedback/${id}`);
-      fetchFeedback(page);
-      if (itemToDelete && itemToDelete.status === 'pending' && onStatusUpdated) {
-        onStatusUpdated();
-      }
-    } catch (err) {
-      console.error('Failed to delete feedback', err);
-    }
-  };
-
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
-  const categoryMap = {
-    bug: { label: 'Bug / Technical Issue', style: { backgroundColor: 'rgba(239, 68, 68, 0.08)', color: '#dc2626', border: '1px solid rgba(239, 68, 68, 0.2)' } },
-    suggestion: { label: 'Suggestion / Idea', style: { backgroundColor: 'rgba(16, 185, 129, 0.08)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' } },
-    other: { label: 'Other', style: { backgroundColor: 'rgba(107, 114, 128, 0.08)', color: '#6b7280', border: '1px solid rgba(107, 114, 128, 0.2)' } }
-  };
-
-  const statusColors = {
-    pending: { color: '#d97706', label: 'Pending' },
-    reviewed: { color: '#2563eb', label: 'Reviewed' },
-    resolved: { color: '#059669', label: 'Resolved' }
-  };
-
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
-        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Feedback Reports</h3>
-        
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <select 
-            value={typeFilter} 
-            onChange={(e) => setTypeFilter(e.target.value)}
-            style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-          >
-            <option value="">All Categories</option>
-            <option value="bug">Bugs</option>
-            <option value="suggestion">Suggestions</option>
-            <option value="other">Other</option>
-          </select>
-
-          <select 
-            value={statusFilter} 
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-          >
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="resolved">Resolved</option>
-          </select>
-        </div>
-      </div>
-
-      {loading ? <LoadingSkeleton rows={5} height={55} /> : (
-        <>
-          {feedback.length === 0 ? (
-            <div className="card" style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text2)' }}>
-              💬 No feedback reports found matching the criteria.
-            </div>
-          ) : (
-            <div className="card responsive-table-card" style={{ overflow: 'hidden' }}>
-              <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>User</th>
-                    <th>Category</th>
-                    <th>Feedback Description</th>
-                    <th className="hide-mobile">URL Path</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {feedback.map((f) => {
-                    const isExpanded = expandedId === f._id;
-                    const cat = categoryMap[f.type] || { label: f.type, style: {} };
-                    const relativeUrl = f.url ? new URL(f.url).pathname : '—';
-                    
-                    return (
-                      <React.Fragment key={f._id}>
-                        <tr style={{ cursor: 'pointer' }} onClick={() => toggleExpand(f._id)}>
-                          <td style={{ width: '30px', fontSize: '0.8rem', color: 'var(--text2)', textAlign: 'center' }}>
-                            {isExpanded ? '▼' : '▶'}
-                          </td>
-                          <td>
-                            <div style={{ fontWeight: 600 }}>{f.userName || 'Guest'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text2)' }}>{f.userEmail || 'No Email'}</div>
-                          </td>
-                          <td>
-                            <span 
-                              style={{ 
-                                padding: '3px 8px', 
-                                borderRadius: '4px', 
-                                fontSize: '0.75rem', 
-                                fontWeight: 600,
-                                ...cat.style
-                              }}
-                            >
-                              {cat.label}
-                            </span>
-                          </td>
-                          <td style={{ color: 'var(--text2)', fontSize: '0.82rem', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={f.description}>
-                            {f.description}
-                          </td>
-                          <td className="hide-mobile" style={{ color: 'var(--text2)', fontSize: '0.82rem', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={f.url}>
-                            {relativeUrl}
-                          </td>
-                          <td style={{ color: 'var(--text2)', fontSize: '0.82rem' }}>
-                            {new Date(f.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </td>
-                          <td onClick={(e) => e.stopPropagation()}>
-                            <select
-                              value={f.status}
-                              onChange={(e) => handleStatusChange(f._id, e.target.value)}
-                              style={{ 
-                                padding: '4px 8px', 
-                                fontSize: '0.8rem', 
-                                fontWeight: 600, 
-                                borderRadius: '4px',
-                                border: '1px solid var(--border)',
-                                color: statusColors[f.status]?.color || 'inherit'
-                              }}
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="reviewed">Reviewed</option>
-                              <option value="resolved">Resolved</option>
-                            </select>
-                          </td>
-                          <td onClick={(e) => e.stopPropagation()}>
-                            <button 
-                              style={deleteBtn} 
-                              onClick={() => handleDeleteClick(f._id)}
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-
-                        {isExpanded && (
-                          <tr style={{ background: 'var(--bg)' }}>
-                            <td colSpan={8} style={{ padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-                                <div>
-                                  <h5 style={{ margin: '0 0 6px', fontSize: '0.82rem', textTransform: 'uppercase', color: 'var(--text2)', letterSpacing: '0.03em' }}>Description</h5>
-                                  <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-                                    {f.description}
-                                  </p>
-                                </div>
-                                
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', borderTop: '1px solid var(--border)', paddingTop: '12px', marginTop: '4px' }}>
-                                  <div>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--text2)', display: 'block' }}>Full URL</span>
-                                    <a href={f.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', wordBreak: 'break-all' }}>
-                                      {f.url || '—'}
-                                    </a>
-                                  </div>
-                                  <div>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--text2)', display: 'block' }}>Screen Size</span>
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{f.screenSize || '—'}</span>
-                                  </div>
-                                  <div>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--text2)', display: 'block' }}>User Agent</span>
-                                    <span style={{ fontSize: '0.78rem', color: 'var(--text)' }} title={f.userAgent}>
-                                      {f.userAgent || '—'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-          {feedback.length > 0 && (
-            <Pagination page={page} pages={pages} onPage={fetchFeedback} />
-          )}
-        </>
-      )}
-
-      <ConfirmModal
-        isOpen={confirmDelete.isOpen}
-        onClose={() => setConfirmDelete({ isOpen: false, id: null })}
-        onConfirm={handleConfirmDelete}
-        title="Delete Feedback"
-        message="Are you sure you want to delete this feedback report? This action cannot be undone."
-      />
-    </div>
-  );
-}
-
 // ── Main Dashboard ────────────────────────────────────────
 const TABS = [
   { id: 'Stats',    icon: '📊' },
@@ -943,21 +684,18 @@ const TABS = [
   { id: 'Barbers',  icon: '✂' },
   { id: 'Bookings', icon: '📋' },
   { id: 'Users',    icon: '👥' },
-  { id: 'Feedback', icon: '💬' },
 ];
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('adminActiveTab') || 'Stats');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pendingFeedbackCount, setPendingFeedbackCount] = useState(0);
 
   const checkConnection = () => {
     setError(null);
     setLoading(true);
     api.get('/admin/stats')
-      .then(({ data }) => {
-        setPendingFeedbackCount(data.pendingFeedbackCount || 0);
+      .then(() => {
         setLoading(false);
       })
       .catch((err) => {
@@ -1011,23 +749,6 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(t.id)}
               >
                 <span style={{ marginRight: '5px' }}>{t.icon}</span>{t.id}
-                {t.id === 'Feedback' && pendingFeedbackCount > 0 && (
-                  <span style={{
-                    marginLeft: '6px',
-                    backgroundColor: '#dc2626',
-                    color: '#fff',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: '10px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    lineHeight: 1
-                  }}>
-                    {pendingFeedbackCount}
-                  </span>
-                )}
               </button>
             ))}
           </div>
@@ -1037,7 +758,6 @@ export default function AdminDashboard() {
           {activeTab === 'Barbers'  && <BarbersTab />}
           {activeTab === 'Bookings' && <BookingsTab />}
           {activeTab === 'Users'    && <UsersTab />}
-          {activeTab === 'Feedback' && <FeedbackTabContent onStatusUpdated={() => setPendingFeedbackCount(prev => Math.max(0, prev - 1))} />}
         </>
       )}
     </div>
