@@ -1,8 +1,16 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const Feedback = require('../models/Feedback');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+
+// Rate limiter: max 5 requests per hour per IP to prevent spamming
+const feedbackLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: { message: 'Too many feedback reports from this IP. Please try again after an hour.' }
+});
 
 // Optional middleware to extract user context if token is present
 const optionalAuth = (req, res, next) => {
@@ -19,8 +27,8 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
-// POST /api/feedback - Public endpoint to submit feedback
-router.post('/', optionalAuth, async (req, res) => {
+// POST /api/feedback - Public endpoint to submit feedback with rate limit protection
+router.post('/', feedbackLimiter, optionalAuth, async (req, res) => {
   try {
     const { type, description, email, url, userAgent, screenSize } = req.body;
 
@@ -49,21 +57,32 @@ router.post('/', optionalAuth, async (req, res) => {
     const feedback = new Feedback(feedbackData);
     await feedback.save();
 
-    // Trigger real-time notifications to Admins ONLY if feedback is a Bug
+    // Trigger notification to all admins ONLY if it is a Bug report
     if (type === 'bug') {
       try {
-        const admins = await User.find({ role: 'admin' }).select('_id');
-        const notifications = admins.map((admin) => ({
-          userId: admin._id,
-          message: `New bug report from ${feedback.userName || feedback.userEmail || 'Guest'}: "${description.substring(0, 35)}..."`,
-          type: 'feedback_created',
-          link: '/admin/dashboard',
-        }));
-        if (notifications.length > 0) {
-          await Notification.insertMany(notifications);
+        const admins = await User.find({ role: 'admin' });
+        const senderName = req.user ? req.user.name : (email ? email.split('@')[0] : 'Guest');
+        let relativePath = 'the platform';
+        if (url) {
+          try {
+            relativePath = new URL(url).pathname;
+          } catch (e) {
+            // ignore malformed url
+          }
         }
-      } catch (notifErr) {
-        console.error('Failed to create admin notifications for bug report:', notifErr);
+
+        const notificationPromises = admins.map(admin => {
+          return new Notification({
+            userId: admin._id,
+            message: `Urgent Bug: ${senderName} reported an issue on ${relativePath}`,
+            type: 'feedback_created',
+            link: '/admin/dashboard'
+          }).save();
+        });
+
+        await Promise.all(notificationPromises);
+      } catch (notifyErr) {
+        console.error('Failed to notify admins of feedback bug:', notifyErr);
       }
     }
 

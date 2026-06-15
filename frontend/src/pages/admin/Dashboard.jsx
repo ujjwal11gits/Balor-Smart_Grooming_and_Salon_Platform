@@ -678,7 +678,7 @@ function UsersTab() {
 }
 
 // ── Feedback Tab ──────────────────────────────────────────
-function FeedbackTabContent() {
+function FeedbackTabContent({ onStatusUpdated }) {
   const [feedback, setFeedback] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -715,8 +715,12 @@ function FeedbackTabContent() {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
+      const oldItem = feedback.find(f => f._id === id);
       const { data } = await api.patch(`/admin/feedback/${id}/status`, { status: newStatus });
       setFeedback(feedback.map(f => f._id === id ? data : f));
+      if (oldItem && oldItem.status === 'pending' && newStatus !== 'pending' && onStatusUpdated) {
+        onStatusUpdated();
+      }
     } catch (err) {
       console.error('Failed to update status', err);
     }
@@ -728,10 +732,14 @@ function FeedbackTabContent() {
 
   const handleConfirmDelete = async () => {
     const id = confirmDelete.id;
+    const itemToDelete = feedback.find(f => f._id === id);
     setConfirmDelete({ isOpen: false, id: null });
     try {
       await api.delete(`/admin/feedback/${id}`);
       fetchFeedback(page);
+      if (itemToDelete && itemToDelete.status === 'pending' && onStatusUpdated) {
+        onStatusUpdated();
+      }
     } catch (err) {
       console.error('Failed to delete feedback', err);
     }
@@ -938,12 +946,14 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('adminActiveTab') || 'Stats');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pendingFeedbackCount, setPendingFeedbackCount] = useState(0);
 
   const checkConnection = () => {
     setError(null);
     setLoading(true);
     api.get('/admin/stats')
-      .then(() => {
+      .then(({ data }) => {
+        setPendingFeedbackCount(data.pendingFeedbackCount || 0);
         setLoading(false);
       })
       .catch((err) => {
@@ -997,6 +1007,23 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(t.id)}
               >
                 <span style={{ marginRight: '5px' }}>{t.icon}</span>{t.id}
+                {t.id === 'Feedback' && pendingFeedbackCount > 0 && (
+                  <span style={{
+                    marginLeft: '6px',
+                    backgroundColor: '#dc2626',
+                    color: '#fff',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    padding: '2px 6px',
+                    borderRadius: '10px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    lineHeight: 1
+                  }}>
+                    {pendingFeedbackCount}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -1006,7 +1033,7 @@ export default function AdminDashboard() {
           {activeTab === 'Barbers'  && <BarbersTab />}
           {activeTab === 'Bookings' && <BookingsTab />}
           {activeTab === 'Users'    && <UsersTab />}
-          {activeTab === 'Feedback' && <FeedbackTabContent />}
+          {activeTab === 'Feedback' && <FeedbackTabContent onStatusUpdated={() => setPendingFeedbackCount(prev => Math.max(0, prev - 1))} />}
         </>
       )}
     </div>

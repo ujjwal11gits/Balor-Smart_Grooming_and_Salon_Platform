@@ -12,11 +12,12 @@ const guard = [protect, requireRole('admin')];
 // GET /api/admin/stats
 router.get('/stats', ...guard, async (req, res) => {
   try {
-    const [totalBookings, totalUsers, totalSalons, totalBarbers] = await Promise.all([
+    const [totalBookings, totalUsers, totalSalons, totalBarbers, pendingFeedbackCount] = await Promise.all([
       Booking.countDocuments(),
       User.countDocuments(),
       Salon.countDocuments(),
       Barber.countDocuments(),
+      Feedback.countDocuments({ status: 'pending' }),
     ]);
 
     const revenueAgg = await Booking.aggregate([
@@ -55,6 +56,7 @@ router.get('/stats', ...guard, async (req, res) => {
       statusCounts,
       bookingsPerDay: perDay,
       topBarbers,
+      pendingFeedbackCount,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import FeedbackTab from './components/FeedbackTab';
@@ -32,10 +32,16 @@ function HomeRedirect() {
 }
 
 export default function App() {
+  const { auth } = useAuth();
+  const location = useLocation();
+
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password');
+  const showFeedback = !!auth || isAuthPage;
+
   return (
     <>
       <Navbar />
-      <FeedbackTab />
+      {showFeedback && <FeedbackTab />}
       <main>
         <ErrorBoundary>
           <Routes>

@@ -37,13 +37,6 @@ app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/verify-otp', authLimiter);
 app.use('/api/auth/forgot-password-otp', authLimiter);
 
-// Rate limiting for feedback submission to prevent spam
-const feedbackLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // limit each IP to 5 requests per hour
-  message: { message: 'Too many feedback submissions. Please try again after an hour.' }
-});
-
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/salons', require('./routes/salons'));
@@ -55,7 +48,7 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/waitlist', require('./routes/waitlist'));
-app.use('/api/feedback', feedbackLimiter, require('./routes/feedback'));
+app.use('/api/feedback', require('./routes/feedback'));
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {

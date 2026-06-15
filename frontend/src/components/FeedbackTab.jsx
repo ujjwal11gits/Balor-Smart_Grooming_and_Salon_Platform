@@ -16,15 +16,6 @@ export default function FeedbackTab() {
 
   const drawerRef = useRef(null);
 
-  // Listen for global custom event to open feedback drawer (e.g. from navbar menu)
-  useEffect(() => {
-    const handleOpenFeedback = () => setIsOpen(true);
-    window.addEventListener('open-feedback-drawer', handleOpenFeedback);
-    return () => {
-      window.removeEventListener('open-feedback-drawer', handleOpenFeedback);
-    };
-  }, []);
-
   // Auto-fill email if logged in
   useEffect(() => {
     if (auth?.email) {
@@ -37,12 +28,7 @@ export default function FeedbackTab() {
   // Close drawer if clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (
-        drawerRef.current && 
-        !drawerRef.current.contains(event.target) && 
-        !event.target.closest('.feedback-trigger-btn') &&
-        !event.target.closest('.mobile-menu-feedback-btn')
-      ) {
+      if (drawerRef.current && !drawerRef.current.contains(event.target) && !event.target.closest('.feedback-trigger-btn')) {
         setIsOpen(false);
       }
     }
@@ -55,10 +41,16 @@ export default function FeedbackTab() {
     };
   }, [isOpen]);
 
-  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password');
-  const shouldShowFeedback = auth !== null || isAuthPage;
-
-  if (!shouldShowFeedback) return null;
+  // Listen to global open-feedback-drawer events
+  useEffect(() => {
+    const handleOpenFeedback = () => {
+      setIsOpen(true);
+    };
+    window.addEventListener('open-feedback-drawer', handleOpenFeedback);
+    return () => {
+      window.removeEventListener('open-feedback-drawer', handleOpenFeedback);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

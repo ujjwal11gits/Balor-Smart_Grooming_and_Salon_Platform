@@ -10,8 +10,9 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  
+
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password');
+  const showFeedback = !!auth || isAuthPage;
 
   const handleLogout = () => {
     logout();
@@ -122,22 +123,21 @@ export default function Navbar() {
             <MobileNavLink to="/shop/dashboard" active={isActive('/shop/dashboard')} onClick={() => setMenuOpen(false)}>My Dashboard</MobileNavLink>
           )}
 
+          {showFeedback && (
+            <button 
+              onClick={() => {
+                setMenuOpen(false);
+                window.dispatchEvent(new Event('open-feedback-drawer'));
+              }}
+              className="drawer-feedback-btn"
+            >
+              <span>🪲</span> Report an Issue
+            </button>
+          )}
+
           {auth ? (
             <>
               <MobileNavLink to="/profile" active={isActive('/profile')} onClick={() => setMenuOpen(false)}>Profile Settings</MobileNavLink>
-              
-              <div className="mobile-menu-feedback-item">
-                <button 
-                  onClick={() => {
-                    window.dispatchEvent(new Event('open-feedback-drawer'));
-                    setMenuOpen(false);
-                  }} 
-                  className="mobile-menu-feedback-btn"
-                >
-                  <span>🪲</span> Give Feedback
-                </button>
-              </div>
-
               <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                 <div style={{ color: 'var(--text2)', fontSize: '0.85rem', marginBottom: '12px', paddingLeft: '8px' }}>
                   Logged in as <strong style={{ color: 'var(--text)' }}>{auth.name}</strong>
@@ -146,25 +146,10 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <>
-              {isAuthPage && (
-                <div className="mobile-menu-feedback-item">
-                  <button 
-                    onClick={() => {
-                      window.dispatchEvent(new Event('open-feedback-drawer'));
-                      setMenuOpen(false);
-                    }} 
-                    className="mobile-menu-feedback-btn"
-                  >
-                    <span>🪲</span> Give Feedback
-                  </button>
-                </div>
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px' }}>
-                <Link to="/login" className="drawer-login-link" onClick={() => setMenuOpen(false)}>Login</Link>
-                <Link to="/register" className="drawer-register-btn" onClick={() => setMenuOpen(false)}>Get Started</Link>
-              </div>
-            </>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px' }}>
+              <Link to="/login" className="drawer-login-link" onClick={() => setMenuOpen(false)}>Login</Link>
+              <Link to="/register" className="drawer-register-btn" onClick={() => setMenuOpen(false)}>Get Started</Link>
+            </div>
           )}
         </div>
       </div>
@@ -330,6 +315,30 @@ export default function Navbar() {
         }
         .drawer-register-btn:hover {
           background: var(--accent-hover);
+        }
+
+        .drawer-feedback-btn {
+          width: 100%;
+          background: rgba(233,69,96,0.05);
+          color: var(--text);
+          border: 1px dashed rgba(233,69,96,0.3);
+          padding: 12px 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.95rem;
+          font-weight: 600;
+          font-family: inherit;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.2s;
+          margin-top: 10px;
+          box-sizing: border-box;
+        }
+        .drawer-feedback-btn:hover {
+          background: rgba(233,69,96,0.1);
+          border-color: var(--accent);
+          color: var(--accent);
         }
 
         .drawer-backdrop {
