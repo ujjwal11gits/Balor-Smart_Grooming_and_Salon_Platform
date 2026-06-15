@@ -279,28 +279,30 @@ export default function LandingPage() {
       </section>
 
       {/* ── Shop Owner CTA ───────────────────────────────────── */}
-      <section style={shopCTASection}>
-        <div style={shopCTAOverlay} />
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: '640px', margin: '0 auto', padding: '0 24px' }}>
-          <span style={{ ...sectionTag, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>For Business Owners</span>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, color: '#fff', margin: '16px 0 14px', lineHeight: 1.2, letterSpacing: '-0.03em' }}>
-            Own a Barbershop?<br />Join Balor Today
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px' }}>
-            Get a powerful dashboard to manage barbers, track bookings, and grow your business — completely free to start.
-          </p>
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {auth ? (
-              <Link to={auth.role === 'shop' ? '/shop/dashboard' : auth.role === 'admin' ? '/admin/dashboard' : '/dashboard'} style={{ ...btnPrimary, background: '#fff', color: '#e94560' }} id="shop-dashboard-cta">Go to Dashboard</Link>
-            ) : (
-              <>
-                <Link to="/register" style={{ ...btnPrimary, background: '#fff', color: '#e94560' }} id="shop-register-cta">Register Your Shop</Link>
-                <Link to="/login" style={{ ...btnGhost, borderColor: 'rgba(255,255,255,0.4)', color: '#fff' }} id="shop-login-cta">Already a member? Sign In</Link>
-              </>
-            )}
+      {(!auth || auth.role !== 'user') && (
+        <section style={shopCTASection}>
+          <div style={shopCTAOverlay} />
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: '640px', margin: '0 auto', padding: '0 24px' }}>
+            <span style={{ ...sectionTag, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>For Business Owners</span>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, color: '#fff', margin: '16px 0 14px', lineHeight: 1.2, letterSpacing: '-0.03em' }}>
+              Own a Barbershop?<br />Join Balor Today
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px' }}>
+              Get a powerful dashboard to manage barbers, track bookings, and grow your business — completely free to start.
+            </p>
+            <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {auth ? (
+                <Link to={auth.role === 'shop' ? '/shop/dashboard' : auth.role === 'admin' ? '/admin/dashboard' : '/dashboard'} style={{ ...btnPrimary, background: '#fff', color: '#e94560' }} id="shop-dashboard-cta">Go to Dashboard</Link>
+              ) : (
+                <>
+                  <Link to="/register" style={{ ...btnPrimary, background: '#fff', color: '#e94560' }} id="shop-register-cta">Register Your Shop</Link>
+                  <Link to="/login" style={{ ...btnGhost, borderColor: 'rgba(255,255,255,0.4)', color: '#fff' }} id="shop-login-cta">Already a member? Sign In</Link>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Final CTA ────────────────────────────────────────── */}
       <section style={{ ...section, textAlign: 'center', padding: '80px 24px' }}>
