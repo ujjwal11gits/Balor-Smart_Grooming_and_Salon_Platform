@@ -187,19 +187,20 @@ export default function BookingForm() {
                 <label className="field-label" style={{ marginBottom: '8px' }}>Select Time Slot</label>
                 {slotsLoading ? (
                   <p style={{ color: 'var(--text2)', fontSize: '0.88rem' }}>Loading slots…</p>
-                ) : availableSlots.length === 0 ? (
-                  <div style={{ padding: '12px', background: 'rgba(239,68,68,0.08)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
-                    <p style={{ color: '#dc2626', fontSize: '0.88rem', margin: '0 0 10px', fontWeight: 500 }}>No slots available for this date and duration.</p>
-                    <button type="button" className="btn-ghost" onClick={handleWaitlist} disabled={waitlistLoading} style={{ fontSize: '0.85rem', color: '#dc2626', borderColor: 'rgba(239,68,68,0.2)', padding: '6px 12px' }}>
-                      {waitlistLoading ? 'Joining...' : 'Join Waitlist for this date'}
-                    </button>
-                  </div>
                 ) : (() => {
+                  const allHourlySlots = [
+                    '00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
+                    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+                    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+                    '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+                  ];
+
                   const workingSlots = barber.workingSlots && barber.workingSlots.length > 0
                     ? barber.workingSlots
                     : ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
-                  
-                  const sortedWorkingSlots = [...workingSlots].sort((a, b) => {
+
+                  const combinedSlots = Array.from(new Set([...allHourlySlots, ...workingSlots]));
+                  const sortedSlots = combinedSlots.sort((a, b) => {
                     const [hA, mA] = a.split(':').map(Number);
                     const [hB, mB] = b.split(':').map(Number);
                     return (hA * 60 + mA) - (hB * 60 + mB);
@@ -229,7 +230,29 @@ export default function BookingForm() {
                     return false;
                   };
 
+                  const timeToMins = (t) => {
+                    const [h, m] = t.split(':').map(Number);
+                    return h * 60 + m;
+                  };
+
+                  const isWithinShopHours = (slotStr) => {
+                    if (!barber || !barber.salonId) return true;
+                    const { openingTime, closingTime } = barber.salonId;
+                    if (!openingTime || !closingTime) return true;
+
+                    const slotStart = timeToMins(slotStr);
+                    const openStart = timeToMins(openingTime);
+                    const closeEnd = timeToMins(closingTime);
+
+                    if (openStart < closeEnd) {
+                      return slotStart >= openStart && slotStart < closeEnd;
+                    } else {
+                      return slotStart >= openStart || slotStart < closeEnd;
+                    }
+                  };
+
                   const getSlotState = (slotStr) => {
+                    if (!isWithinShopHours(slotStr)) return 'closed';
                     const isAvailable = availableSlots.includes(slotStr) && !isSlotInPast(slotStr);
                     if (!isAvailable) return 'booked';
                     if (form.timeSlot === slotStr) return 'selected';
@@ -248,32 +271,79 @@ export default function BookingForm() {
                     const base = {
                       padding: '10px 8px',
                       borderRadius: '8px',
-                      fontSize: '0.85rem',
+                      fontSize: '0.82rem',
                       fontWeight: 700,
                       cursor: 'pointer',
                       fontFamily: 'inherit',
-                      transition: 'all 0.15s ease',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                       textAlign: 'center',
                       border: '1.5px solid transparent',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      gap: '4px'
                     };
                     switch (state) {
                       case 'selected':
-                        return { ...base, background: 'var(--accent)', color: '#fff', borderColor: 'var(--accent)' };
+                        return { 
+                          ...base, 
+                          background: 'var(--accent)', 
+                          color: '#fff', 
+                          borderColor: 'var(--accent)', 
+                          boxShadow: '0 4px 12px rgba(233, 69, 96, 0.35)' 
+                        };
                       case 'fast-filling':
-                        return { ...base, background: 'rgba(217, 119, 6, 0.06)', color: '#d97706', borderColor: 'rgba(217, 119, 6, 0.25)' };
+                        return { 
+                          ...base, 
+                          background: 'rgba(217, 119, 6, 0.06)', 
+                          color: '#d97706', 
+                          borderColor: 'rgba(217, 119, 6, 0.25)' 
+                        };
                       case 'booked':
-                        return { ...base, background: 'var(--bg)', color: 'var(--text3)', borderColor: 'var(--border)', textDecoration: 'line-through', opacity: 0.4, cursor: 'not-allowed', pointerEvents: 'none' };
+                        return { 
+                          ...base, 
+                          background: 'rgba(0, 0, 0, 0.02)', 
+                          color: 'var(--text3)', 
+                          borderColor: 'var(--border)', 
+                          textDecoration: 'line-through', 
+                          opacity: 0.4, 
+                          cursor: 'not-allowed', 
+                          pointerEvents: 'none' 
+                        };
+                      case 'closed':
+                        return { 
+                          ...base, 
+                          background: 'rgba(0, 0, 0, 0.04)', 
+                          color: 'var(--text3)', 
+                          borderColor: 'var(--border)', 
+                          borderStyle: 'dashed',
+                          opacity: 0.2, 
+                          cursor: 'not-allowed', 
+                          pointerEvents: 'none' 
+                        };
                       case 'available':
                       default:
-                        return { ...base, background: 'rgba(5, 150, 105, 0.06)', color: '#059669', borderColor: 'rgba(5, 150, 105, 0.25)' };
+                        return { 
+                          ...base, 
+                          background: 'rgba(5, 150, 105, 0.06)', 
+                          color: '#059669', 
+                          borderColor: 'rgba(5, 150, 105, 0.25)' 
+                        };
                     }
                   };
 
+                  const formatTimeSlotForDisplay = (slotStr) => {
+                    const [hoursStr, minutesStr] = slotStr.split(':');
+                    const hours = parseInt(hoursStr, 10);
+                    const minutes = parseInt(minutesStr, 10);
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    const displayHours = hours % 12 || 12;
+                    const displayMinutes = minutes < 10 ? `0${minutes}` : minutes;
+                    return `${displayHours}:${displayMinutes} ${ampm}`;
+                  };
+
                   const groupedSlots = { morning: [], afternoon: [], evening: [] };
-                  sortedWorkingSlots.forEach((slot) => {
+                  sortedSlots.forEach((slot) => {
                     const cat = getSlotCategory(slot);
                     groupedSlots[cat].push(slot);
                   });
@@ -284,13 +354,19 @@ export default function BookingForm() {
                     { id: 'evening', label: 'Evening', emoji: '🌆' }
                   ];
 
+                  const hasAvailable = sortedSlots.some((slot) => {
+                    const state = getSlotState(slot);
+                    return state === 'available' || state === 'fast-filling';
+                  });
+
                   return (
                     <div>
                       {/* Legend */}
-                      <div style={{ display: 'flex', gap: '14px', marginBottom: '14px', fontSize: '0.78rem', color: 'var(--text2)', fontWeight: 600 }}>
+                      <div style={{ display: 'flex', gap: '14px', marginBottom: '14px', fontSize: '0.78rem', color: 'var(--text2)', fontWeight: 600, flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#059669' }}></span> Available</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#d97706' }}></span> Fast Filling</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--text3)', opacity: 0.5 }}></span> Booked</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1px dashed var(--text3)', opacity: 0.3 }}></span> Closed / Off-hours</div>
                       </div>
 
                       {/* Grids */}
@@ -303,7 +379,7 @@ export default function BookingForm() {
                               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text2)', display: 'block', marginBottom: '8px' }}>
                                 {cat.emoji} {cat.label}
                               </span>
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(95px, 1fr))', gap: '8px' }}>
                                 {slots.map((slot) => {
                                   const state = getSlotState(slot);
                                   return (
@@ -313,7 +389,7 @@ export default function BookingForm() {
                                       onClick={() => setForm((f) => ({ ...f, timeSlot: slot }))}
                                       style={getSlotStyle(state)}
                                     >
-                                      {slot}
+                                      {formatTimeSlotForDisplay(slot)}
                                     </button>
                                   );
                                 })}
@@ -322,6 +398,15 @@ export default function BookingForm() {
                           );
                         })}
                       </div>
+
+                      {!hasAvailable && (
+                        <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(239,68,68,0.08)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)', textAlign: 'center' }}>
+                          <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: '0 0 10px', fontWeight: 500 }}>All slots on this date are fully booked or closed.</p>
+                          <button type="button" className="btn-ghost" onClick={handleWaitlist} disabled={waitlistLoading} style={{ fontSize: '0.85rem', color: '#dc2626', borderColor: 'rgba(239,68,68,0.2)', padding: '6px 12px' }}>
+                            {waitlistLoading ? 'Joining...' : 'Join Waitlist for this date'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
