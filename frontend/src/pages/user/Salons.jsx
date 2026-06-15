@@ -11,6 +11,15 @@ const SERVICE_ICONS = {
   'default': '✨'
 };
 
+const SERVICE_OPTIONS = [
+  { value: 'haircut', label: 'Haircut' },
+  { value: 'beard', label: 'Beard' },
+  { value: 'styling', label: 'Styling' },
+  { value: 'shave', label: 'Shave' },
+  { value: 'spa', label: 'Spa' },
+  { value: 'facial', label: 'Facial' }
+];
+
 export default function Salons() {
   const { auth } = useAuth();
   const [salons, setSalons] = useState([]);
@@ -18,8 +27,21 @@ export default function Salons() {
   const [search, setSearch] = useState('');
   const [ratingFilter, setRatingFilter] = useState('all');
   const [priceFilter, setPriceFilter] = useState('all');
-  const [serviceFilter, setServiceFilter] = useState('all');
+  const [serviceFilters, setServiceFilters] = useState([]);
+  const [showServiceDropdown, setShowServiceDropdown] = useState(false);
   const [shopFilter, setShopFilter] = useState('all');
+
+  // close service dropdown when clicking outside
+  useEffect(() => {
+    if (!showServiceDropdown) return;
+    const handleClose = (e) => {
+      if (!e.target.closest('.custom-multiselect-container')) {
+        setShowServiceDropdown(false);
+      }
+    };
+    document.addEventListener('click', handleClose);
+    return () => document.removeEventListener('click', handleClose);
+  }, [showServiceDropdown]);
   const [favorites, setFavorites] = useState({ salons: [], barbers: [] });
   const [quickBarbers, setQuickBarbers] = useState([]);
   const [selectedQuickBarber, setSelectedQuickBarber] = useState(null);
@@ -88,7 +110,7 @@ export default function Salons() {
     setSearch('');
     setRatingFilter('all');
     setPriceFilter('all');
-    setServiceFilter('all');
+    setServiceFilters([]);
     setShopFilter('all');
   };
 
@@ -114,19 +136,20 @@ export default function Salons() {
       if (minPrice > maxPrice) return false;
     }
 
-    if (serviceFilter !== 'all') {
-      const serviceQuery = serviceFilter.toLowerCase();
-      const hasService = s.services?.some((ser) => {
-        const name = ser.name.toLowerCase();
-        if (serviceQuery === 'haircut') return name.includes('hair') || name.includes('cut');
-        if (serviceQuery === 'beard') return name.includes('beard');
-        if (serviceQuery === 'styling') return name.includes('style');
-        if (serviceQuery === 'shave') return name.includes('shave') || name.includes('shaving');
-        if (serviceQuery === 'spa') return name.includes('spa');
-        if (serviceQuery === 'facial') return name.includes('facial') || name.includes('face');
-        return name.includes(serviceQuery);
+    if (serviceFilters.length > 0) {
+      const matchesAllSelected = serviceFilters.every((serviceQuery) => {
+        return s.services?.some((ser) => {
+          const name = ser.name.toLowerCase();
+          if (serviceQuery === 'haircut') return name.includes('hair') || name.includes('cut');
+          if (serviceQuery === 'beard') return name.includes('beard');
+          if (serviceQuery === 'styling') return name.includes('style');
+          if (serviceQuery === 'shave') return name.includes('shave') || name.includes('shaving');
+          if (serviceQuery === 'spa') return name.includes('spa');
+          if (serviceQuery === 'facial') return name.includes('facial') || name.includes('face');
+          return name.includes(serviceQuery);
+        });
       });
-      if (!hasService) return false;
+      if (!matchesAllSelected) return false;
     }
 
     if (shopFilter === 'favorites') {
@@ -141,7 +164,7 @@ export default function Salons() {
   const activeFilterCount = [
     ratingFilter !== 'all',
     priceFilter !== 'all',
-    serviceFilter !== 'all',
+    serviceFilters.length > 0,
     shopFilter !== 'all',
   ].filter(Boolean).length;
 
@@ -202,20 +225,61 @@ export default function Salons() {
               </select>
             </div>
 
-            <div className="select-wrapper">
-              <select
-                className={`filter-select ${serviceFilter !== 'all' ? 'filter-active' : ''}`}
-                value={serviceFilter}
-                onChange={(e) => setServiceFilter(e.target.value)}
+            <div className="custom-multiselect-container">
+              <button
+                type="button"
+                className={`multiselect-trigger ${serviceFilters.length > 0 ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowServiceDropdown(!showServiceDropdown);
+                }}
               >
-                <option value="all">All Services</option>
-                <option value="haircut">Haircut</option>
-                <option value="beard">Beard</option>
-                <option value="styling">Styling</option>
-                <option value="shave">Shave</option>
-                <option value="spa">Spa</option>
-                <option value="facial">Facial</option>
-              </select>
+                <span>
+                  {serviceFilters.length === 0
+                    ? 'All Services'
+                    : serviceFilters.length === 1
+                    ? SERVICE_OPTIONS.find(o => o.value === serviceFilters[0])?.label || serviceFilters[0]
+                    : `${serviceFilters.length} Selected`}
+                </span>
+                <span style={{ fontSize: '0.75rem', transform: showServiceDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+              </button>
+
+              {showServiceDropdown && (
+                <div className="multiselect-dropdown" onClick={(e) => e.stopPropagation()}>
+                  <div className="multiselect-header">
+                    <span>Select Services</span>
+                    {serviceFilters.length > 0 && (
+                      <button
+                        type="button"
+                        className="multiselect-clear-btn"
+                        onClick={() => setServiceFilters([])}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  {SERVICE_OPTIONS.map((opt) => {
+                    const isChecked = serviceFilters.includes(opt.value);
+                    return (
+                      <label key={opt.value} className="multiselect-option">
+                        <input
+                          type="checkbox"
+                          className="multiselect-option-checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            setServiceFilters(prev =>
+                              prev.includes(opt.value)
+                                ? prev.filter(v => v !== opt.value)
+                                : [...prev, opt.value]
+                            );
+                          }}
+                        />
+                        <span>{opt.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="select-wrapper">
@@ -266,7 +330,7 @@ export default function Salons() {
         <span style={{ fontSize: '0.88rem', color: 'var(--text2)', fontWeight: 600 }}>
           {filteredSalons.length} {filteredSalons.length === 1 ? 'shop' : 'shops'} found
         </span>
-        {(search || ratingFilter !== 'all' || priceFilter !== 'all' || serviceFilter !== 'all' || shopFilter !== 'all') && (
+        {(search || ratingFilter !== 'all' || priceFilter !== 'all' || serviceFilters.length > 0 || shopFilter !== 'all') && (
           <button
             onClick={handleReset}
             className="reset-btn-link"
@@ -276,12 +340,8 @@ export default function Salons() {
         )}
       </div>
 
-      {loading ? (
-        <LoadingSkeleton rows={3} height={220} />
-      ) : (
-        <>
-          <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
             
             .quick-book-avatar {
               transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -715,7 +775,133 @@ export default function Salons() {
               box-shadow: 0 4px 12px rgba(233, 69, 96, 0.35) !important;
               transform: translateY(-1px);
             }
-          `}</style>
+
+            /* Custom Multiselect styles */
+            .custom-multiselect-container {
+              position: relative;
+              width: 100%;
+            }
+            .multiselect-trigger {
+              width: 100%;
+              padding: 11px 14px;
+              border-radius: 12px;
+              border: 1.5px solid var(--border);
+              background: var(--input-bg);
+              color: var(--text);
+              font-size: 0.88rem;
+              font-weight: 500;
+              text-align: left;
+              cursor: pointer;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              transition: all 0.2s ease;
+              user-select: none;
+              box-sizing: border-box;
+            }
+            .multiselect-trigger:focus, .multiselect-trigger.active {
+              border-color: var(--accent);
+              box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+            }
+            .multiselect-trigger.active {
+              background-color: rgba(233, 69, 96, 0.04);
+              color: var(--accent);
+              font-weight: 600;
+            }
+            body.dark .multiselect-trigger.active {
+              background-color: rgba(233, 69, 96, 0.1);
+            }
+            .multiselect-dropdown {
+              position: absolute;
+              top: calc(100% + 6px);
+              left: 0;
+              right: 0;
+              background: var(--card);
+              border: 1px solid var(--border);
+              border-radius: 12px;
+              padding: 10px;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+              z-index: 1000;
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+            body.dark .multiselect-dropdown {
+              background: rgba(26, 26, 45, 0.95);
+              backdrop-filter: blur(16px);
+              -webkit-backdrop-filter: blur(16px);
+            }
+            .multiselect-option {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 8px 10px;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: background 0.15s ease;
+              user-select: none;
+              font-size: 0.88rem;
+              color: var(--text);
+            }
+            .multiselect-option:hover {
+              background: rgba(233, 69, 96, 0.05);
+            }
+            body.dark .multiselect-option:hover {
+              background: rgba(255, 255, 255, 0.05);
+            }
+            .multiselect-option-checkbox {
+              appearance: none;
+              width: 16px;
+              height: 16px;
+              border: 1.5px solid var(--border);
+              border-radius: 4px;
+              outline: none;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.15s ease;
+              background: var(--input-bg);
+              margin: 0;
+            }
+            .multiselect-option-checkbox:checked {
+              background: var(--accent);
+              border-color: var(--accent);
+            }
+            .multiselect-option-checkbox:checked::after {
+              content: "✓";
+              color: #fff;
+              font-size: 0.68rem;
+              font-weight: bold;
+            }
+            .multiselect-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 4px 10px 8px;
+              border-bottom: 1px solid var(--border);
+              margin-bottom: 6px;
+              font-size: 0.76rem;
+              color: var(--text2);
+            }
+            .multiselect-clear-btn {
+              background: none;
+              border: none;
+              color: var(--accent);
+              font-weight: 700;
+              cursor: pointer;
+              padding: 0;
+              font-size: 0.76rem;
+            }
+            .multiselect-clear-btn:hover {
+              text-decoration: underline;
+            }
+      `}</style>
+
+      {loading ? (
+        <LoadingSkeleton rows={3} height={220} />
+      ) : (
+        <>
           {filteredSalons.length === 0 && (
             <div style={emptyState}>
               <div style={{ fontSize: '3rem', marginBottom: '12px' }}>✂</div>
