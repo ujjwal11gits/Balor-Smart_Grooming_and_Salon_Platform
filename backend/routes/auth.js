@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Salon = require('../models/Salon');
-const { sendMail } = require('../utils/mailer');
+const { sendMail, sendMailBackground } = require('../utils/mailer');
 
 const signAccess = (user) =>
   jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, {
@@ -244,14 +244,16 @@ router.post('/forgot-password', async (req, res) => {
     user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
     await user.save();
 
+    // ✅ Respond immediately — token is saved in DB
+    res.json({ message: 'If that email exists, a reset link was sent.' });
+
+    // 🔔 Send reset link email in background (not OTP, just a link notification)
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
-    await sendMail({
+    sendMailBackground({
       to: email,
       subject: 'Password Reset — Balor',
       html: `<p>Click to reset your password (valid 1 hour):</p><a href="${resetUrl}">${resetUrl}</a>`,
     });
-
-    res.json({ message: 'If that email exists, a reset link was sent.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
