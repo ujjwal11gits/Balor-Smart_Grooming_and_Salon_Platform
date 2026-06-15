@@ -319,26 +319,18 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ────────────────────────────────────────── */}
-      <section style={{ ...section, textAlign: 'center', padding: '80px 24px' }}>
-        <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '14px' }}>
-          Ready for Your Best Haircut?
-        </h2>
-        <p style={{ color: 'var(--text2)', fontSize: '1rem', marginBottom: '32px' }}>Join thousands of customers already using Balor.</p>
-        <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {auth ? (
-            auth.role === 'user' ? (
-              <Link to="/salons" style={btnPrimary} id="footer-book-now">🔍 Find a Barber Near You</Link>
-            ) : (
-              <Link to={auth.role === 'shop' ? '/shop/dashboard' : '/admin/dashboard'} style={btnPrimary} id="footer-dashboard-cta">Go to Dashboard</Link>
-            )
-          ) : (
-            <>
-              <Link to="/register" style={btnPrimary} id="footer-register-cta">Create Free Account</Link>
-              <Link to="/login" style={{ ...btnPrimary, background: 'transparent', color: 'var(--accent)', border: '1.5px solid var(--accent)' }} id="footer-login-cta">Sign In</Link>
-            </>
-          )}
-        </div>
-      </section>
+      {!auth && (
+        <section style={{ ...section, textAlign: 'center', padding: '80px 24px' }}>
+          <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '14px' }}>
+            Ready for Your Best Haircut?
+          </h2>
+          <p style={{ color: 'var(--text2)', fontSize: '1rem', marginBottom: '32px' }}>Join thousands of customers already using Balor.</p>
+          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/register" style={btnPrimary} id="footer-register-cta">Create Free Account</Link>
+            <Link to="/login" style={{ ...btnPrimary, background: 'transparent', color: 'var(--accent)', border: '1.5px solid var(--accent)' }} id="footer-login-cta">Sign In</Link>
+          </div>
+        </section>
+      )}
 
       {/* ── Footer ───────────────────────────────────────────── */}
       <footer style={footerStyle}>
