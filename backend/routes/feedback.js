@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const Feedback = require('../models/Feedback');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // Optional middleware to extract user context if token is present
 const optionalAuth = (req, res, next) => {
@@ -46,6 +48,24 @@ router.post('/', optionalAuth, async (req, res) => {
 
     const feedback = new Feedback(feedbackData);
     await feedback.save();
+
+    // Trigger real-time notifications to Admins ONLY if feedback is a Bug
+    if (type === 'bug') {
+      try {
+        const admins = await User.find({ role: 'admin' }).select('_id');
+        const notifications = admins.map((admin) => ({
+          userId: admin._id,
+          message: `New bug report from ${feedback.userName || feedback.userEmail || 'Guest'}: "${description.substring(0, 35)}..."`,
+          type: 'feedback_created',
+          link: '/admin/dashboard',
+        }));
+        if (notifications.length > 0) {
+          await Notification.insertMany(notifications);
+        }
+      } catch (notifErr) {
+        console.error('Failed to create admin notifications for bug report:', notifErr);
+      }
+    }
 
     res.status(201).json({ message: 'Feedback submitted successfully', feedback });
   } catch (err) {
