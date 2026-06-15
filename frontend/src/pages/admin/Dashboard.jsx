@@ -779,16 +779,23 @@ function FeedbackTabContent({ onStatusUpdated }) {
                   }
 
                   return (
-                    <optgroup key={f._id} label={userDisplay} style={{ border: 'none' }}>
+                    <React.Fragment key={f._id}>
                       <tr 
                         onClick={() => setExpandedId(isExpanded ? null : f._id)}
                         style={{ cursor: 'pointer', transition: 'background 0.15s' }}
                         className={isExpanded ? 'active-row' : ''}
                       >
-                        <td style={{ fontWeight: 600 }}>
-                          {f.userId?.name || f.userEmail?.split('@')[0] || 'Guest'}
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{f.userId?.name || 'Guest User'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginTop: '2px' }}>
+                            {f.userId ? `${f.userId.email} (${f.userId.role})` : (f.userEmail || 'No Email')}
+                          </div>
                         </td>
-                        <td>{typeLabel}</td>
+                        <td>
+                          <span className={`badge ${f.type === 'bug' ? 'badge-cancelled' : f.type === 'suggestion' ? 'badge-confirmed' : 'badge-pending'}`}>
+                            {f.type === 'bug' ? 'Bug' : f.type === 'suggestion' ? 'Suggestion' : 'Other'}
+                          </span>
+                        </td>
                         <td className="hide-mobile" style={{ color: 'var(--text2)', fontSize: '0.85rem' }}>{path}</td>
                         <td style={{ color: 'var(--text2)', fontSize: '0.85rem' }}>
                           {new Date(f.createdAt).toLocaleDateString()}
@@ -799,12 +806,13 @@ function FeedbackTabContent({ onStatusUpdated }) {
                             onChange={(e) => handleStatusChange(f._id, e.target.value)}
                             style={{
                               padding: '4px 8px',
-                              borderRadius: '4px',
+                              borderRadius: '6px',
                               border: '1px solid var(--border)',
-                              background: 'var(--card-bg)',
+                              background: 'var(--card)',
                               color: 'var(--text)',
                               fontSize: '0.8rem',
                               fontFamily: 'inherit',
+                              cursor: 'pointer'
                             }}
                           >
                             <option value="pending">Pending</option>
@@ -827,7 +835,9 @@ function FeedbackTabContent({ onStatusUpdated }) {
                           <td colSpan={6} style={{ padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                               <div>
-                                <h5 style={{ margin: '0 0 6px', fontSize: '0.82rem', textTransform: 'uppercase', color: 'var(--text2)', letterSpacing: '0.03em' }}>Description</h5>
+                                <h5 style={{ margin: '0 0 6px', fontSize: '0.82rem', textTransform: 'uppercase', color: 'var(--text2)', letterSpacing: '0.03em', fontWeight: 700 }}>
+                                  Issue Description
+                                </h5>
                                 <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
                                   {f.description}
                                 </p>
@@ -855,7 +865,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
                           </td>
                         </tr>
                       )}
-                    </optgroup>
+                    </React.Fragment>
                   );
                 })}
               </tbody>
