@@ -42,6 +42,20 @@ export default function Salons() {
     document.addEventListener('click', handleClose);
     return () => document.removeEventListener('click', handleClose);
   }, [showServiceDropdown]);
+
+  const getServiceFilterLabel = () => {
+    if (serviceFilters.length === 0) return 'All Services';
+    const labels = serviceFilters.map(val => {
+      const found = SERVICE_OPTIONS.find(o => o.value === val);
+      return found ? found.label : val;
+    });
+    const joined = labels.join(', ');
+    if (joined.length > 20) {
+      return `${serviceFilters.length} Selected`;
+    }
+    return joined;
+  };
+
   const [favorites, setFavorites] = useState({ salons: [], barbers: [] });
   const [quickBarbers, setQuickBarbers] = useState([]);
   const [selectedQuickBarber, setSelectedQuickBarber] = useState(null);
@@ -235,11 +249,7 @@ export default function Salons() {
                 }}
               >
                 <span>
-                  {serviceFilters.length === 0
-                    ? 'All Services'
-                    : serviceFilters.length === 1
-                    ? SERVICE_OPTIONS.find(o => o.value === serviceFilters[0])?.label || serviceFilters[0]
-                    : `${serviceFilters.length} Selected`}
+                  {getServiceFilterLabel()}
                 </span>
                 <span style={{ fontSize: '0.75rem', transform: showServiceDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
               </button>
@@ -254,28 +264,42 @@ export default function Salons() {
                         className="multiselect-clear-btn"
                         onClick={() => setServiceFilters([])}
                       >
-                        Clear
+                        Clear All
                       </button>
                     )}
                   </div>
                   {SERVICE_OPTIONS.map((opt) => {
                     const isChecked = serviceFilters.includes(opt.value);
                     return (
-                      <label key={opt.value} className="multiselect-option">
-                        <input
-                          type="checkbox"
-                          className="multiselect-option-checkbox"
-                          checked={isChecked}
-                          onChange={() => {
+                      <div
+                        key={opt.value}
+                        className="multiselect-option"
+                        role="checkbox"
+                        aria-checked={isChecked}
+                        tabIndex={0}
+                        onClick={() => {
+                          setServiceFilters(prev =>
+                            prev.includes(opt.value)
+                              ? prev.filter(v => v !== opt.value)
+                              : [...prev, opt.value]
+                          );
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === ' ' || e.key === 'Enter') {
+                            e.preventDefault();
                             setServiceFilters(prev =>
                               prev.includes(opt.value)
                                 ? prev.filter(v => v !== opt.value)
                                 : [...prev, opt.value]
                             );
-                          }}
-                        />
+                          }
+                        }}
+                      >
+                        <span className={`custom-checkbox-box ${isChecked ? 'checked' : ''}`}>
+                          {isChecked && "✓"}
+                        </span>
                         <span>{opt.label}</span>
-                      </label>
+                      </div>
                     );
                   })}
                 </div>
@@ -293,6 +317,30 @@ export default function Salons() {
               </select>
             </div>
           </div>
+
+          {serviceFilters.length > 0 && (
+            <div className="active-chips-row">
+              {serviceFilters.map((val) => {
+                const opt = SERVICE_OPTIONS.find(o => o.value === val);
+                return (
+                  <span key={val} className="active-filter-chip">
+                    {opt?.label || val}
+                    <button
+                      type="button"
+                      className="remove-chip-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setServiceFilters(prev => prev.filter(v => v !== val));
+                      }}
+                      aria-label={`Remove ${opt?.label || val} filter`}
+                    >
+                      ✕
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -426,6 +474,8 @@ export default function Salons() {
             .search-banner {
               margin-bottom: 32px;
               text-align: left;
+              position: relative;
+              z-index: 50;
             }
             .search-title {
               font-family: 'Playfair Display', 'Georgia', serif;
@@ -461,6 +511,8 @@ export default function Salons() {
               display: flex;
               flex-direction: column;
               gap: 16px;
+              position: relative;
+              z-index: 60;
             }
             body.dark .filter-card {
               background: rgba(26, 26, 45, 0.65);
@@ -834,45 +886,40 @@ export default function Salons() {
             .multiselect-option {
               display: flex;
               align-items: center;
-              gap: 10px;
-              padding: 8px 10px;
+              gap: 12px;
+              padding: 10px 12px;
               border-radius: 8px;
               cursor: pointer;
-              transition: background 0.15s ease;
+              transition: all 0.2s ease;
               user-select: none;
-              font-size: 0.88rem;
+              font-size: 0.9rem;
               color: var(--text);
+              outline: none;
             }
-            .multiselect-option:hover {
+            .multiselect-option:hover, .multiselect-option:focus-visible {
               background: rgba(233, 69, 96, 0.05);
             }
-            body.dark .multiselect-option:hover {
-              background: rgba(255, 255, 255, 0.05);
+            body.dark .multiselect-option:hover, body.dark .multiselect-option:focus-visible {
+              background: rgba(255, 255, 255, 0.04);
             }
-            .multiselect-option-checkbox {
-              appearance: none;
-              width: 16px;
-              height: 16px;
-              border: 1.5px solid var(--border);
-              border-radius: 4px;
-              outline: none;
-              cursor: pointer;
+            .custom-checkbox-box {
+              width: 18px;
+              height: 18px;
+              border: 2px solid var(--border);
+              border-radius: 6px;
               display: flex;
               align-items: center;
               justify-content: center;
-              transition: all 0.15s ease;
+              font-size: 0.78rem;
+              font-weight: 900;
+              color: #fff;
+              transition: all 0.2s ease;
               background: var(--input-bg);
-              margin: 0;
             }
-            .multiselect-option-checkbox:checked {
+            .custom-checkbox-box.checked {
               background: var(--accent);
               border-color: var(--accent);
-            }
-            .multiselect-option-checkbox:checked::after {
-              content: "✓";
-              color: #fff;
-              font-size: 0.68rem;
-              font-weight: bold;
+              box-shadow: 0 2px 6px rgba(233, 69, 96, 0.25);
             }
             .multiselect-header {
               display: flex;
@@ -895,6 +942,54 @@ export default function Salons() {
             }
             .multiselect-clear-btn:hover {
               text-decoration: underline;
+            }
+
+            /* Active Filter Chips */
+            .active-chips-row {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+              margin-top: 6px;
+              border-top: 1px solid var(--border);
+              padding-top: 14px;
+            }
+            .active-filter-chip {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: rgba(233, 69, 96, 0.06);
+              border: 1px solid rgba(233, 69, 96, 0.18);
+              color: var(--accent);
+              font-size: 0.78rem;
+              font-weight: 700;
+              padding: 4px 12px;
+              border-radius: 20px;
+              user-select: none;
+              animation: fadeIn 0.2s ease;
+            }
+            body.dark .active-filter-chip {
+              background: rgba(233, 69, 96, 0.12);
+              border-color: rgba(233, 69, 96, 0.3);
+            }
+            .remove-chip-btn {
+              background: none;
+              border: none;
+              color: var(--accent);
+              font-weight: 800;
+              cursor: pointer;
+              padding: 0;
+              font-size: 0.72rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              transition: all 0.15s ease;
+            }
+            .remove-chip-btn:hover {
+              background: var(--accent);
+              color: #fff;
             }
       `}</style>
 
