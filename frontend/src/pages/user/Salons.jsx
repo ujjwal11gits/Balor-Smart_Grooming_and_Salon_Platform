@@ -26,22 +26,29 @@ export default function Salons() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [ratingFilter, setRatingFilter] = useState('all');
+  const [showRatingDropdown, setShowRatingDropdown] = useState(false);
   const [priceFilter, setPriceFilter] = useState('all');
+  const [showPriceDropdown, setShowPriceDropdown] = useState(false);
   const [serviceFilters, setServiceFilters] = useState([]);
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
   const [shopFilter, setShopFilter] = useState('all');
+  const [showShopDropdown, setShowShopDropdown] = useState(false);
 
-  // close service dropdown when clicking outside
+  // close all dropdowns when clicking outside
   useEffect(() => {
-    if (!showServiceDropdown) return;
     const handleClose = (e) => {
-      if (!e.target.closest('.custom-multiselect-container')) {
+      if (
+        !e.target.closest('.custom-dropdown-container')
+      ) {
+        setShowRatingDropdown(false);
+        setShowPriceDropdown(false);
         setShowServiceDropdown(false);
+        setShowShopDropdown(false);
       }
     };
     document.addEventListener('click', handleClose);
     return () => document.removeEventListener('click', handleClose);
-  }, [showServiceDropdown]);
+  }, []);
 
   const getServiceFilterLabel = () => {
     if (serviceFilters.length === 0) return 'All Services';
@@ -126,6 +133,10 @@ export default function Salons() {
     setPriceFilter('all');
     setServiceFilters([]);
     setShopFilter('all');
+    setShowRatingDropdown(false);
+    setShowPriceDropdown(false);
+    setShowServiceDropdown(false);
+    setShowShopDropdown(false);
   };
 
   // Filter logic (real-time client-side)
@@ -213,49 +224,111 @@ export default function Salons() {
           </button>
           
           <div className={`selectors-grid ${showFiltersMobile ? 'mobile-show' : ''}`}>
-            <div className="select-wrapper">
-              <select
-                className={`filter-select ${ratingFilter !== 'all' ? 'filter-active' : ''}`}
-                value={ratingFilter}
-                onChange={(e) => setRatingFilter(e.target.value)}
-              >
-                <option value="all">Any rating</option>
-                <option value="4">4★ and above</option>
-                <option value="3">3★ and above</option>
-                <option value="2">2★ and above</option>
-              </select>
-            </div>
-            
-            <div className="select-wrapper">
-              <select
-                className={`filter-select ${priceFilter !== 'all' ? 'filter-active' : ''}`}
-                value={priceFilter}
-                onChange={(e) => setPriceFilter(e.target.value)}
-              >
-                <option value="all">Any price</option>
-                <option value="200">Under ₹200</option>
-                <option value="500">Under ₹500</option>
-                <option value="1000">Under ₹1000</option>
-              </select>
-            </div>
-
-            <div className="custom-multiselect-container">
+            {/* Rating Filter */}
+            <div className="custom-dropdown-container">
               <button
                 type="button"
-                className={`multiselect-trigger ${serviceFilters.length > 0 ? 'active' : ''}`}
+                className={`dropdown-trigger ${ratingFilter !== 'all' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowRatingDropdown(!showRatingDropdown);
+                  setShowPriceDropdown(false);
+                  setShowServiceDropdown(false);
+                  setShowShopDropdown(false);
+                }}
+              >
+                <span>
+                  {ratingFilter === 'all' ? 'Any rating' : `${ratingFilter}★ and above`}
+                </span>
+                <span className="dropdown-arrow" style={{ transform: showRatingDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+              </button>
+
+              {showRatingDropdown && (
+                <div className="custom-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                  {[
+                    { value: 'all', label: 'Any rating' },
+                    { value: '4', label: '4★ and above' },
+                    { value: '3', label: '3★ and above' },
+                    { value: '2', label: '2★ and above' }
+                  ].map((opt) => (
+                    <div
+                      key={opt.value}
+                      className={`custom-dropdown-option ${ratingFilter === opt.value ? 'selected' : ''}`}
+                      onClick={() => {
+                        setRatingFilter(opt.value);
+                        setShowRatingDropdown(false);
+                      }}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Price Filter */}
+            <div className="custom-dropdown-container">
+              <button
+                type="button"
+                className={`dropdown-trigger ${priceFilter !== 'all' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowPriceDropdown(!showPriceDropdown);
+                  setShowRatingDropdown(false);
+                  setShowServiceDropdown(false);
+                  setShowShopDropdown(false);
+                }}
+              >
+                <span>
+                  {priceFilter === 'all' ? 'Any price' : `Under ₹${priceFilter}`}
+                </span>
+                <span className="dropdown-arrow" style={{ transform: showPriceDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+              </button>
+
+              {showPriceDropdown && (
+                <div className="custom-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                  {[
+                    { value: 'all', label: 'Any price' },
+                    { value: '200', label: 'Under ₹200' },
+                    { value: '500', label: 'Under ₹500' },
+                    { value: '1000', label: 'Under ₹1000' }
+                  ].map((opt) => (
+                    <div
+                      key={opt.value}
+                      className={`custom-dropdown-option ${priceFilter === opt.value ? 'selected' : ''}`}
+                      onClick={() => {
+                        setPriceFilter(opt.value);
+                        setShowPriceDropdown(false);
+                      }}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Services Filter */}
+            <div className="custom-dropdown-container">
+              <button
+                type="button"
+                className={`dropdown-trigger ${serviceFilters.length > 0 ? 'active' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowServiceDropdown(!showServiceDropdown);
+                  setShowRatingDropdown(false);
+                  setShowPriceDropdown(false);
+                  setShowShopDropdown(false);
                 }}
               >
                 <span>
                   {getServiceFilterLabel()}
                 </span>
-                <span style={{ fontSize: '0.75rem', transform: showServiceDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+                <span className="dropdown-arrow" style={{ transform: showServiceDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
               </button>
 
               {showServiceDropdown && (
-                <div className="multiselect-dropdown" onClick={(e) => e.stopPropagation()}>
+                <div className="custom-dropdown-menu" style={{ padding: '10px', gap: '4px' }} onClick={(e) => e.stopPropagation()}>
                   <div className="multiselect-header">
                     <span>Select Services</span>
                     {serviceFilters.length > 0 && (
@@ -306,15 +379,44 @@ export default function Salons() {
               )}
             </div>
 
-            <div className="select-wrapper">
-              <select
-                className={`filter-select ${shopFilter !== 'all' ? 'filter-active' : ''}`}
-                value={shopFilter}
-                onChange={(e) => setShopFilter(e.target.value)}
+            {/* Shop Filter */}
+            <div className="custom-dropdown-container">
+              <button
+                type="button"
+                className={`dropdown-trigger ${shopFilter !== 'all' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowShopDropdown(!showShopDropdown);
+                  setShowRatingDropdown(false);
+                  setShowPriceDropdown(false);
+                  setShowServiceDropdown(false);
+                }}
               >
-                <option value="all">All Shops</option>
-                <option value="favorites">Favorites Only</option>
-              </select>
+                <span>
+                  {shopFilter === 'all' ? 'All Shops' : 'Favorites Only'}
+                </span>
+                <span className="dropdown-arrow" style={{ transform: showShopDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+              </button>
+
+              {showShopDropdown && (
+                <div className="custom-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                  {[
+                    { value: 'all', label: 'All Shops' },
+                    { value: 'favorites', label: 'Favorites Only' }
+                  ].map((opt) => (
+                    <div
+                      key={opt.value}
+                      className={`custom-dropdown-option ${shopFilter === opt.value ? 'selected' : ''}`}
+                      onClick={() => {
+                        setShopFilter(opt.value);
+                        setShowShopDropdown(false);
+                      }}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -828,12 +930,12 @@ export default function Salons() {
               transform: translateY(-1px);
             }
 
-            /* Custom Multiselect styles */
-            .custom-multiselect-container {
+            /* Custom Dropdown & Multiselect styles */
+            .custom-dropdown-container {
               position: relative;
               width: 100%;
             }
-            .multiselect-trigger {
+            .dropdown-trigger {
               width: 100%;
               padding: 11px 14px;
               border-radius: 12px;
@@ -851,19 +953,29 @@ export default function Salons() {
               user-select: none;
               box-sizing: border-box;
             }
-            .multiselect-trigger:focus, .multiselect-trigger.active {
+            .dropdown-trigger:focus, .dropdown-trigger.active {
               border-color: var(--accent);
               box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+              background: var(--input-bg);
             }
-            .multiselect-trigger.active {
+            .dropdown-trigger.active {
               background-color: rgba(233, 69, 96, 0.04);
               color: var(--accent);
               font-weight: 600;
+              border-color: var(--accent);
             }
-            body.dark .multiselect-trigger.active {
+            body.dark .dropdown-trigger.active {
               background-color: rgba(233, 69, 96, 0.1);
             }
-            .multiselect-dropdown {
+            .dropdown-arrow {
+              font-size: 0.75rem;
+              transition: transform 0.2s;
+              color: var(--text2);
+            }
+            .dropdown-trigger.active .dropdown-arrow {
+              color: var(--accent);
+            }
+            .custom-dropdown-menu {
               position: absolute;
               top: calc(100% + 6px);
               left: 0;
@@ -871,18 +983,46 @@ export default function Salons() {
               background: var(--card);
               border: 1px solid var(--border);
               border-radius: 12px;
-              padding: 10px;
+              padding: 6px;
               box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
               z-index: 1000;
               display: flex;
               flex-direction: column;
-              gap: 4px;
+              gap: 2px;
             }
-            body.dark .multiselect-dropdown {
+            body.dark .custom-dropdown-menu {
               background: rgba(26, 26, 45, 0.95);
               backdrop-filter: blur(16px);
               -webkit-backdrop-filter: blur(16px);
             }
+            .custom-dropdown-option {
+              padding: 10px 14px;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.15s ease;
+              font-size: 0.88rem;
+              color: var(--text);
+              user-select: none;
+              text-align: left;
+            }
+            .custom-dropdown-option:hover {
+              background: rgba(233, 69, 96, 0.05);
+              color: var(--accent);
+            }
+            body.dark .custom-dropdown-option:hover {
+              background: rgba(255, 255, 255, 0.04);
+              color: var(--accent);
+            }
+            .custom-dropdown-option.selected {
+              background: rgba(233, 69, 96, 0.08);
+              color: var(--accent);
+              font-weight: 700;
+            }
+            body.dark .custom-dropdown-option.selected {
+              background: rgba(233, 69, 96, 0.15);
+            }
+
+            /* Multiselect options */
             .multiselect-option {
               display: flex;
               align-items: center;
