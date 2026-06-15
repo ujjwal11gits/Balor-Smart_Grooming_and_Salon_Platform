@@ -769,12 +769,16 @@ function FeedbackTabContent({ onStatusUpdated }) {
                     : (f.userEmail ? `${f.userEmail} (Guest)` : 'Anonymous Guest');
 
                   const typeLabel = f.type === 'bug' ? '🔴 Bug' : f.type === 'suggestion' ? '💡 Suggestion' : '💬 Other';
-                  let path = 'Unknown';
-                  if (f.url) {
+                  let path = f.url || '—';
+                  if (path.startsWith('http')) {
                     try {
-                      path = new URL(f.url).pathname;
+                      const urlObj = new URL(path);
+                      path = urlObj.pathname + urlObj.search;
                     } catch (e) {
-                      path = f.url;
+                      const parts = path.split('/');
+                      if (parts.length > 3) {
+                        path = '/' + parts.slice(3).join('/');
+                      }
                     }
                   }
 
@@ -822,6 +826,12 @@ function FeedbackTabContent({ onStatusUpdated }) {
                         </td>
                         <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                           <button 
+                            style={editBtn} 
+                            onClick={() => setExpandedId(isExpanded ? null : f._id)}
+                          >
+                            {isExpanded ? 'Hide' : 'View'}
+                          </button>
+                          <button 
                             style={deleteBtn} 
                             onClick={() => handleDeleteClick(f._id)}
                           >
@@ -831,31 +841,31 @@ function FeedbackTabContent({ onStatusUpdated }) {
                       </tr>
 
                       {isExpanded && (
-                        <tr style={{ background: 'var(--bg)' }}>
-                          <td colSpan={6} style={{ padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-                              <div>
-                                <h5 style={{ margin: '0 0 6px', fontSize: '0.82rem', textTransform: 'uppercase', color: 'var(--text2)', letterSpacing: '0.03em', fontWeight: 700 }}>
-                                  Issue Description
+                        <tr style={{ background: 'var(--table-head)' }}>
+                          <td colSpan={6} style={{ padding: '20px 24px', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+                              <div style={{ background: 'var(--card)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                <h5 style={{ margin: '0 0 8px', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text2)', letterSpacing: '0.04em', fontWeight: 800 }}>
+                                  📝 Exact Feedback Description
                                 </h5>
-                                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                                <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                                   {f.description}
                                 </p>
                               </div>
                               
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', borderTop: '1px solid var(--border)', paddingTop: '12px', marginTop: '4px' }}>
-                                <div style={{ minWidth: '150px' }}>
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--text2)', display: 'block' }}>Full URL</span>
-                                  <a href={f.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', wordBreak: 'break-all' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', paddingLeft: '8px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text2)', display: 'block', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>FULL URL</span>
+                                  <a href={f.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: 'var(--accent)', wordBreak: 'break-all' }}>
                                     {f.url || '—'}
                                   </a>
                                 </div>
                                 <div>
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--text2)', display: 'block' }}>Screen Size</span>
-                                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{f.screenSize || '—'}</span>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text2)', display: 'block', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>SCREEN SIZE</span>
+                                  <span style={{ fontSize: '0.8rem', color: 'var(--text)', fontWeight: 600 }}>{f.screenSize || '—'}</span>
                                 </div>
                                 <div>
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--text2)', display: 'block' }}>User Agent</span>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text2)', display: 'block', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>USER AGENT</span>
                                   <span style={{ fontSize: '0.78rem', color: 'var(--text)' }} title={f.userAgent}>
                                     {f.userAgent || '—'}
                                   </span>
