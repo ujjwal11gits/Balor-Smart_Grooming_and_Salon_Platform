@@ -805,6 +805,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
                     <th></th>
                     <th>User</th>
                     <th>Category</th>
+                    <th>Feedback Description</th>
                     <th className="hide-mobile">URL Path</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -818,7 +819,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
                     const relativeUrl = f.url ? new URL(f.url).pathname : '—';
                     
                     return (
-                      <optgroup style={{ border: 'none' }} key={f._id}>
+                      <React.Fragment key={f._id}>
                         <tr style={{ cursor: 'pointer' }} onClick={() => toggleExpand(f._id)}>
                           <td style={{ width: '30px', fontSize: '0.8rem', color: 'var(--text2)', textAlign: 'center' }}>
                             {isExpanded ? '▼' : '▶'}
@@ -839,6 +840,9 @@ function FeedbackTabContent({ onStatusUpdated }) {
                             >
                               {cat.label}
                             </span>
+                          </td>
+                          <td style={{ color: 'var(--text2)', fontSize: '0.82rem', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={f.description}>
+                            {f.description}
                           </td>
                           <td className="hide-mobile" style={{ color: 'var(--text2)', fontSize: '0.82rem', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={f.url}>
                             {relativeUrl}
@@ -876,7 +880,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
 
                         {isExpanded && (
                           <tr style={{ background: 'var(--bg)' }}>
-                            <td colSpan={7} style={{ padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
+                            <td colSpan={8} style={{ padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                                 <div>
                                   <h5 style={{ margin: '0 0 6px', fontSize: '0.82rem', textTransform: 'uppercase', color: 'var(--text2)', letterSpacing: '0.03em' }}>Description</h5>
@@ -907,7 +911,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
                             </td>
                           </tr>
                         )}
-                      </optgroup>
+                      </React.Fragment>
                     );
                   })}
                 </tbody>

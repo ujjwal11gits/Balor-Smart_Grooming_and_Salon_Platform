@@ -54,6 +54,8 @@ export default function FeedbackTab() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // Guard against race conditions and multiple clicks
+    
     if (!description.trim()) {
       setError('Please provide a description.');
       return;

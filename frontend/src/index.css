@@ -612,3 +612,9 @@ body.dark .feedback-trigger-btn {
     display: none !important;
   }
 }
+
+.feedback-submit-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}

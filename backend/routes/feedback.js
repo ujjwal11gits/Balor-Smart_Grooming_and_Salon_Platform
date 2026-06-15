@@ -57,33 +57,34 @@ router.post('/', feedbackLimiter, optionalAuth, async (req, res) => {
     const feedback = new Feedback(feedbackData);
     await feedback.save();
 
-    // Trigger notification to all admins ONLY if it is a Bug report
+    // Trigger notification to all admins in the background ONLY if it is a Bug report
     if (type === 'bug') {
-      try {
-        const admins = await User.find({ role: 'admin' });
-        const senderName = req.user ? req.user.name : (email ? email.split('@')[0] : 'Guest');
-        let relativePath = 'the platform';
-        if (url) {
-          try {
-            relativePath = new URL(url).pathname;
-          } catch (e) {
-            // ignore malformed url
+      User.find({ role: 'admin' })
+        .then(admins => {
+          const senderName = req.user ? req.user.name : (email ? email.split('@')[0] : 'Guest');
+          let relativePath = 'the platform';
+          if (url) {
+            try {
+              relativePath = new URL(url).pathname;
+            } catch (e) {
+              // ignore malformed url
+            }
           }
-        }
 
-        const notificationPromises = admins.map(admin => {
-          return new Notification({
-            userId: admin._id,
-            message: `Urgent Bug: ${senderName} reported an issue on ${relativePath}`,
-            type: 'feedback_created',
-            link: '/admin/dashboard'
-          }).save();
+          const notificationPromises = admins.map(admin => {
+            return new Notification({
+              userId: admin._id,
+              message: `Urgent Bug: ${senderName} reported an issue on ${relativePath}`,
+              type: 'feedback_created',
+              link: '/admin/dashboard'
+            }).save();
+          });
+
+          return Promise.all(notificationPromises);
+        })
+        .catch(notifyErr => {
+          console.error('Failed to notify admins of feedback bug in background:', notifyErr);
         });
-
-        await Promise.all(notificationPromises);
-      } catch (notifyErr) {
-        console.error('Failed to notify admins of feedback bug:', notifyErr);
-      }
     }
 
     res.status(201).json({ message: 'Feedback submitted successfully', feedback });
