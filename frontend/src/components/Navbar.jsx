@@ -11,6 +11,9 @@ export default function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password');
+  const showFeedback = auth ? (auth.role !== 'admin') : isAuthPage;
+
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
@@ -123,6 +126,17 @@ export default function Navbar() {
           {auth ? (
             <>
               <MobileNavLink to="/profile" active={isActive('/profile')} onClick={() => setMenuOpen(false)}>Profile Settings</MobileNavLink>
+              {showFeedback && (
+                <button 
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.dispatchEvent(new Event('open-feedback-drawer'));
+                  }}
+                  className="drawer-feedback-btn"
+                >
+                  <span>🪲</span> Report an Issue
+                </button>
+              )}
               <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                 <div style={{ color: 'var(--text2)', fontSize: '0.85rem', marginBottom: '12px', paddingLeft: '8px' }}>
                   Logged in as <strong style={{ color: 'var(--text)' }}>{auth.name}</strong>
@@ -131,10 +145,23 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px' }}>
-              <Link to="/login" className="drawer-login-link" onClick={() => setMenuOpen(false)}>Login</Link>
-              <Link to="/register" className="drawer-register-btn" onClick={() => setMenuOpen(false)}>Get Started</Link>
-            </div>
+            <>
+              {showFeedback && (
+                <button 
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.dispatchEvent(new Event('open-feedback-drawer'));
+                  }}
+                  className="drawer-feedback-btn"
+                >
+                  <span>🪲</span> Report an Issue
+                </button>
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px' }}>
+                <Link to="/login" className="drawer-login-link" onClick={() => setMenuOpen(false)}>Login</Link>
+                <Link to="/register" className="drawer-register-btn" onClick={() => setMenuOpen(false)}>Get Started</Link>
+              </div>
+            </>
           )}
         </div>
       </div>
