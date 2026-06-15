@@ -53,3 +53,25 @@ export function formatTime12(timeStr) {
   
   return `${displayHours}:${displayMinutes} ${ampm}`;
 }
+
+/**
+ * Formats a salon's location details into a single clean address string without repeating city/state/zip if already inside the address.
+ * 
+ * @param {object} salon 
+ * @returns {string} Formatted address
+ */
+export function formatAddress(salon) {
+  if (!salon) return 'No address configured';
+  const parts = [];
+  if (salon.address) parts.push(salon.address.trim());
+  if (salon.city && (!salon.address || !salon.address.toLowerCase().includes(salon.city.toLowerCase()))) {
+    parts.push(salon.city.trim());
+  }
+  if (salon.state && (!salon.address || !salon.address.toLowerCase().includes(salon.state.toLowerCase()))) {
+    parts.push(salon.state.trim());
+  }
+  if (salon.zipCode && (!salon.address || !salon.address.toLowerCase().includes(salon.zipCode.trim()))) {
+    parts.push(salon.zipCode.trim());
+  }
+  return parts.filter(Boolean).join(', ') || 'No address configured';
+}

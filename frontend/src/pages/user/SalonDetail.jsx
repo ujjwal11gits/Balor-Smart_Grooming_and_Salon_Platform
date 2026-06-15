@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-import { isShopActive, formatTime12 } from '../../utils/status';
+import { isShopActive, formatTime12, formatAddress } from '../../utils/status';
 import { useAuth } from '../../context/AuthContext';
 
 function Stars({ rating }) {
@@ -105,7 +105,7 @@ export default function SalonDetail() {
               {favorites.salons.includes(id) ? '♥' : '♡'}
             </button>
           </div>
-          <p style={{ color: 'var(--text2)', margin: '0 0 8px', fontSize: '0.9rem' }}>📍 {salon.address}</p>
+          <p style={{ color: 'var(--text2)', margin: '0 0 8px', fontSize: '0.9rem' }}>📍 {formatAddress(salon)}</p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 24px', margin: '12px 0', padding: '10px 14px', background: 'var(--bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.88rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text2)' }}>

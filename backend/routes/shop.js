@@ -32,7 +32,13 @@ router.put('/my-salon', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
     if (!salon) return res.status(404).json({ message: 'No salon found for this account' });
-    const { name, address, city, state, zipCode, description, imageUrl, services, phone, openingTime, closingTime } = req.body;
+    const { name, ownerName, address, city, state, zipCode, description, imageUrl, services, phone, openingTime, closingTime } = req.body;
+    
+    // Update owner name on User model if provided
+    if (ownerName && salon.ownerId) {
+      await User.findByIdAndUpdate(salon.ownerId._id, { name: ownerName });
+    }
+
     salon.name = name ?? salon.name;
     salon.address = address ?? salon.address;
     salon.city = city ?? salon.city;

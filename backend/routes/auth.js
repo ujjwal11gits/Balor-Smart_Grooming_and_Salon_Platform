@@ -30,7 +30,7 @@ const getCookieOptions = () => {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, phone, salonName, salonAddress, salonRegId } = req.body;
+    const { name, email, password, role, phone, salonName, salonAddress, salonCity, salonRegId } = req.body;
     const allowedRoles = ['user', 'shop'];
     if (role && !allowedRoles.includes(role))
       return res.status(400).json({ message: 'Invalid role' });
@@ -56,14 +56,14 @@ router.post('/register', async (req, res) => {
         if (user.role === 'shop') {
           await Salon.findOneAndUpdate(
             { ownerId: user._id },
-            { name: salonName || `${name}'s Salon`, address: salonAddress || 'Address not set', registrationId: salonRegId },
+            { name: salonName || `${name}'s Salon`, address: salonAddress || 'Address not set', city: salonCity || '', registrationId: salonRegId },
             { upsert: true }
           );
         }
       }
     } else {
       user = await User.create({ 
-        name, email, password, role: role || 'user', phone,
+      name, email, password, role: role || 'user', phone,
         otpCode: otp,
         otpExpiry,
         isVerified: false
@@ -74,6 +74,7 @@ router.post('/register', async (req, res) => {
         await Salon.create({
           name: salonName || `${name}'s Salon`,
           address: salonAddress || 'Address not set',
+          city: salonCity || '',
           ownerId: user._id,
           registrationId: salonRegId,
         });

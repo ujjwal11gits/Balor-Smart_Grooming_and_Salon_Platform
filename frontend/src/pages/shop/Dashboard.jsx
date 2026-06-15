@@ -9,7 +9,7 @@ import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import Pagination from '../../components/Pagination';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
-import { isShopActive, formatTime12 } from '../../utils/status';
+import { isShopActive, formatTime12, formatAddress } from '../../utils/status';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -18,22 +18,6 @@ const STATUS_CONFIG = {
   confirmed: { cls: 'badge-confirmed', label: 'Confirmed' },
   completed: { cls: 'badge-completed', label: 'Completed' },
   cancelled: { cls: 'badge-cancelled', label: 'Cancelled' },
-};
-
-const formatAddress = (salon) => {
-  if (!salon) return 'No address configured';
-  const parts = [];
-  if (salon.address) parts.push(salon.address.trim());
-  if (salon.city && (!salon.address || !salon.address.toLowerCase().includes(salon.city.toLowerCase()))) {
-    parts.push(salon.city.trim());
-  }
-  if (salon.state && (!salon.address || !salon.address.toLowerCase().includes(salon.state.toLowerCase()))) {
-    parts.push(salon.state.trim());
-  }
-  if (salon.zipCode && (!salon.address || !salon.address.toLowerCase().includes(salon.zipCode.trim()))) {
-    parts.push(salon.zipCode.trim());
-  }
-  return parts.filter(Boolean).join(', ') || 'No address configured';
 };
 
 function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Yes, Remove', cancelText = 'Cancel' }) {
@@ -78,14 +62,16 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
 // ── Overview Tab ───────────────────────────────────────────
 function OverviewTab({ salon, setSalon, stats }) {
   const navigate = useNavigate();
+  const { updateAuthName } = useAuth();
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: '', address: '', city: '', state: '', zipCode: '', description: '', imageUrl: '', phone: '', openingTime: '09:00', closingTime: '21:00' });
+  const [form, setForm] = useState({ name: '', ownerName: '', address: '', city: '', state: '', zipCode: '', description: '', imageUrl: '', phone: '', openingTime: '09:00', closingTime: '21:00' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const startEdit = () => {
     setForm({
       name: salon.name,
+      ownerName: salon.ownerId?.name || '',
       address: salon.address,
       city: salon.city || '',
       state: salon.state || '',
@@ -107,6 +93,9 @@ function OverviewTab({ salon, setSalon, stats }) {
     try {
       const { data } = await api.put('/shop/my-salon', form);
       setSalon(data);
+      if (form.ownerName) {
+        updateAuthName(form.ownerName);
+      }
       setEditing(false);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save salon details.');
@@ -221,6 +210,7 @@ function OverviewTab({ salon, setSalon, stats }) {
             {error && <div className="alert-error" style={{ marginBottom: '16px' }}>{error}</div>}
             <div className="dashboard-form-grid">
               <div className="field-group" style={{ gridColumn: '1 / -1' }}><label className="field-label">Salon Name</label><input className="field-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+              <div className="field-group" style={{ gridColumn: '1 / -1' }}><label className="field-label">Owner Name</label><input className="field-input" value={form.ownerName} onChange={(e) => setForm({ ...form, ownerName: e.target.value })} required /></div>
               
               {/* Modern address inputs grouping */}
               <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '10px', padding: '14px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>

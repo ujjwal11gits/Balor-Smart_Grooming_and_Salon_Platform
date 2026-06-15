@@ -7,7 +7,7 @@ export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user', phone: '', salonName: '', salonAddress: '', salonRegId: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user', phone: '', salonName: '', salonAddress: '', salonCity: '', salonRegId: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -46,10 +46,20 @@ export default function Register() {
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
           const data = await res.json();
-          if (data && data.display_name) {
-            setForm((prev) => ({ ...prev, salonAddress: data.display_name }));
+          if (data && data.address) {
+            const addr = data.address;
+            const city = addr.city || addr.town || addr.village || addr.suburb || addr.county || '';
+            const roadParts = [addr.house_number, addr.road, addr.neighbourhood, addr.suburb].filter(Boolean);
+            const streetAddr = roadParts.join(', ') || data.display_name;
+            setForm((prev) => ({
+              ...prev,
+              salonAddress: streetAddr,
+              salonCity: city
+            }));
+          } else if (data && data.display_name) {
+            setForm((prev) => ({ ...prev, salonAddress: data.display_name, salonCity: '' }));
           } else {
-            setForm((prev) => ({ ...prev, salonAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
+            setForm((prev) => ({ ...prev, salonAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, salonCity: '' }));
           }
         } catch (err) {
           console.error('Error reverse geocoding:', err);
@@ -96,7 +106,10 @@ export default function Register() {
         errors.salonName = 'Enter salon name';
       }
       if (!form.salonAddress.trim()) {
-        errors.salonAddress = 'Enter salon address';
+        errors.salonAddress = 'Enter street address';
+      }
+      if (!form.salonCity.trim()) {
+        errors.salonCity = 'Enter city / area';
       }
     }
 
@@ -108,7 +121,11 @@ export default function Register() {
     setLoading(true);
     try {
       const payload = { ...form };
-      if (form.role !== 'shop') { delete payload.salonName; delete payload.salonAddress; }
+      if (form.role !== 'shop') { 
+        delete payload.salonName; 
+        delete payload.salonAddress; 
+        delete payload.salonCity; 
+      }
       const { data } = await api.post('/auth/register', payload);
       if (data.requiresOtp) {
         const parts = data.email.split('@');
@@ -285,7 +302,7 @@ export default function Register() {
                     </div>
                     <div className="field-group" style={{ margin: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label className="field-label">Salon Address</label>
+                        <label className="field-label">Street Address</label>
                         <button
                           type="button"
                           onClick={handleUseCurrentLocation}
@@ -306,8 +323,13 @@ export default function Register() {
                           {locating ? '⏳ Locating...' : '📍 Use Current Location'}
                         </button>
                       </div>
-                      <input className={`field-input ${fieldErrors.salonAddress ? 'input-error' : ''}`} placeholder="Street, City" value={form.salonAddress} onChange={(e) => setForm({ ...form, salonAddress: e.target.value })} required={form.role === 'shop'} />
+                      <input className={`field-input ${fieldErrors.salonAddress ? 'input-error' : ''}`} placeholder="e.g. Flat/Room No, Building, Street" value={form.salonAddress} onChange={(e) => setForm({ ...form, salonAddress: e.target.value })} required={form.role === 'shop'} />
                       {fieldErrors.salonAddress && <span style={errorTextStyle}>{fieldErrors.salonAddress}</span>}
+                    </div>
+                    <div className="field-group" style={{ margin: 0 }}>
+                      <label className="field-label">City / Area</label>
+                      <input className={`field-input ${fieldErrors.salonCity ? 'input-error' : ''}`} placeholder="e.g. Siwan" value={form.salonCity} onChange={(e) => setForm({ ...form, salonCity: e.target.value })} required={form.role === 'shop'} />
+                      {fieldErrors.salonCity && <span style={errorTextStyle}>{fieldErrors.salonCity}</span>}
                     </div>
                     <div className="field-group" style={{ margin: 0 }}>
                       <label className="field-label">Registration ID (Optional)</label>
