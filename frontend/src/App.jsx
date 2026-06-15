@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import FeedbackTab from './components/FeedbackTab';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -34,6 +35,7 @@ export default function App() {
   return (
     <>
       <Navbar />
+      <FeedbackTab />
       <main>
         <ErrorBoundary>
           <Routes>

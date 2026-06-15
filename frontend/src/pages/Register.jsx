@@ -369,7 +369,7 @@ export default function Register() {
               {otpError && <div className="alert-error" style={{ marginBottom: '16px', textAlign: 'center' }}>{otpError}</div>}
 
               <form onSubmit={handleVerify}>
-                <div style={otpGrid} onPaste={handleOtpPaste}>
+                <div className="otp-grid-container" style={otpGrid} onPaste={handleOtpPaste}>
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
@@ -380,6 +380,7 @@ export default function Register() {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      className="otp-input-field"
                       style={{ ...otpInput, ...(digit ? otpInputFilled : {}), borderColor: otpError ? '#dc2626' : digit ? 'var(--accent)' : 'var(--border)' }}
                       aria-label={`OTP digit ${idx + 1}`}
                     />
@@ -447,6 +448,17 @@ export default function Register() {
         @media (max-width: 500px) {
           .register-form-grid {
             grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 380px) {
+          .otp-grid-container {
+            gap: 5px !important;
+          }
+          .otp-input-field {
+            width: 36px !important;
+            height: 46px !important;
+            font-size: 1.2rem !important;
+            border-radius: 6px !important;
           }
         }
       `}</style>

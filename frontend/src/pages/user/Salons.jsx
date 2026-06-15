@@ -1131,6 +1131,16 @@ export default function Salons() {
               background: var(--accent);
               color: #fff;
             }
+            @media (max-width: 380px) {
+              .quick-book-services-grid {
+                grid-template-columns: 1fr !important;
+              }
+            }
+            @media (max-width: 400px) {
+              .drawer-content {
+                padding: 16px !important;
+              }
+            }
       `}</style>
 
       {loading ? (
@@ -1613,7 +1623,7 @@ function QuickBookingDrawer({ barber, userPhone, onClose }) {
               <div className="field-group" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label className="field-label" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)', display: 'block' }}>Select Services</label>
                 {fullBarber.salonId?.services && fullBarber.salonId.services.length > 0 ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div className="quick-book-services-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     {fullBarber.salonId.services.map((s) => {
                       const isSelected = form.services.includes(s.name);
                       return (

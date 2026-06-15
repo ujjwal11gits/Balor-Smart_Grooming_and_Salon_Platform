@@ -90,7 +90,7 @@ export default function Availability() {
         <h3 style={{ margin: '0 0 6px', fontSize: '0.97rem', fontWeight: 700 }}>Unavailable Dates</h3>
         <p style={{ color: 'var(--text2)', fontSize: '0.86rem', marginBottom: '16px' }}>Mark holidays or personal days off.</p>
 
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+        <div className="add-date-row" style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
           <input
             type="date"
             value={unavailableInput}
@@ -128,6 +128,17 @@ export default function Availability() {
       <button className="btn-primary" onClick={save} style={{ padding: '12px 32px', fontSize: '0.95rem' }}>
         Save Availability
       </button>
+      <style>{`
+        @media (max-width: 400px) {
+          .add-date-row {
+            flex-direction: column !important;
+            width: 100% !important;
+          }
+          .add-date-row input, .add-date-row button {
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -51,6 +51,11 @@ export default function NotificationBell() {
         .notification-item:hover {
           background: rgba(255, 255, 255, 0.04) !important;
         }
+        @media (max-width: 360px) {
+          .notification-dropdown {
+            width: 280px !important;
+          }
+        }
       `}</style>
       <button onClick={handleOpen} style={bellStyle} title="Notifications">
         🔔
@@ -60,7 +65,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div style={dropdownStyle}>
+        <div className="notification-dropdown" style={dropdownStyle}>
           <div style={dropHeaderStyle}>
             <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Notifications</span>
             {unread === 0 && <span style={{ fontSize: '0.75rem', color: 'var(--text3)' }}>All caught up</span>}

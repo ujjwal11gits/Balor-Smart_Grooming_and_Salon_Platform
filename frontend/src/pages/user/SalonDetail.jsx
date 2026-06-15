@@ -107,7 +107,7 @@ export default function SalonDetail() {
           </div>
           <p style={{ color: 'var(--text2)', margin: '0 0 8px', fontSize: '0.9rem' }}>📍 {formatAddress(salon)}</p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 24px', margin: '12px 0', padding: '10px 14px', background: 'var(--bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.88rem' }}>
+          <div className="salon-info-badge-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 24px', margin: '12px 0', padding: '10px 14px', background: 'var(--bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.88rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text2)' }}>
               <span>📞</span> <strong>{salon.phone || 'No contact phone'}</strong>
             </div>
@@ -249,6 +249,13 @@ export default function SalonDetail() {
         ))}
       </div>
       <style>{`
+        @media (max-width: 480px) {
+          .salon-info-badge-row {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+        }
         @media (max-width: 600px) {
           .barber-detail-card {
             flex-direction: column !important;

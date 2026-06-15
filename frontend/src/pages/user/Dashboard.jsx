@@ -109,10 +109,10 @@ export default function UserDashboard() {
 
       {/* Customer Profile Card */}
       <div className="card" style={{ padding: '24px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+        <div className="customer-profile-card-inner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
           
           {/* Left: Avatar & Profile Info */}
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="customer-profile-info-wrap" style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{
               width: '80px', height: '80px', borderRadius: '50%',
               background: 'linear-gradient(135deg, #e94560, #a0153e)',
@@ -159,7 +159,7 @@ export default function UserDashboard() {
           </div>
 
           {/* Right: Actions */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="customer-profile-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button className="btn-primary" onClick={() => navigate('/salons')} style={{ fontSize: '0.83rem', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>🔍 Browse Salons</button>
             <button className="btn-ghost" onClick={() => navigate('/my-bookings')} style={{ fontSize: '0.83rem', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>📅 My Bookings</button>
           </div>
@@ -391,6 +391,30 @@ export default function UserDashboard() {
           })}
         </div>
       )}
+      <style>{`
+        @media (max-width: 600px) {
+          .customer-profile-card-inner {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 16px !important;
+          }
+          .customer-profile-info-wrap {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 12px !important;
+          }
+          .customer-profile-actions {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .customer-profile-actions button {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

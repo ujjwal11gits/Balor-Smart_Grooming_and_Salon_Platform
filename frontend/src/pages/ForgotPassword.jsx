@@ -48,7 +48,7 @@ export default function ForgotPassword() {
 }
 
 const styles = {
-  container: { maxWidth: '400px', margin: '60px auto', padding: '32px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--card)' },
+  container: { maxWidth: '400px', width: '90%', margin: '60px auto', padding: '24px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--card)', boxSizing: 'border-box' },
   form: { display: 'flex', flexDirection: 'column', gap: '12px' },
   input: { padding: '10px', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '1rem', width: '100%' },
   btn: { padding: '10px', background: '#e94560', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' },

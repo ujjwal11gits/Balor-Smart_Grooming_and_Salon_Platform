@@ -853,7 +853,7 @@ function BookingsTab() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
           
           {/* 1. Active & New Booking Requests Section */}
-          <div className="card" style={{ padding: '20px' }}>
+          <div className="card responsive-table-card" style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)' }}>
                 📥 Active Bookings & Requests ({activeBookings.length})
@@ -948,7 +948,7 @@ function BookingsTab() {
           </div>
 
           {/* 2. Completed & Cancelled Bookings Section */}
-          <div className="card" style={{ padding: '20px' }}>
+          <div className="card responsive-table-card" style={{ padding: '20px' }}>
             <h3 style={{ margin: '0 0 16px', fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)' }}>
               📋 Completed & Cancelled Bookings ({pastBookings.length})
             </h3>

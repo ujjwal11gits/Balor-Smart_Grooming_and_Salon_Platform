@@ -125,8 +125,8 @@ export default function PublicProfile() {
       <button onClick={() => navigate(-1)} style={backBtn}>← Back</button>
 
       {/* Profile hero */}
-      <div className="card" style={{ padding: '28px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', gap: '22px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div className="card barber-profile-card" style={{ padding: '28px', marginBottom: '20px' }}>
+        <div className="barber-profile-info-wrap" style={{ display: 'flex', gap: '22px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <img
             src={barber.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(barber.name)}&background=1a1a2e&color=e94560&size=100`}
             alt={barber.name}
@@ -160,7 +160,7 @@ export default function PublicProfile() {
         </div>
 
         <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div className="barber-profile-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button className="btn-primary" onClick={() => navigate(`/book/${barber._id}`)} style={{ padding: '11px 32px', fontSize: '0.95rem' }}>
               Book Appointment
             </button>
@@ -235,6 +235,28 @@ export default function PublicProfile() {
           </div>
         ))}
       </div>
+      <style>{`
+        @media (max-width: 480px) {
+          .barber-profile-card {
+            padding: 16px !important;
+          }
+          .barber-profile-info-wrap {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 16px !important;
+          }
+          .barber-profile-actions {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .barber-profile-actions button {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
