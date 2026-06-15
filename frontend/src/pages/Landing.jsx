@@ -278,10 +278,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Shop Owner CTA ───────────────────────────────────── */}
-      {(!auth || auth.role !== 'user') && (
-        <section style={shopCTASection}>
-          <div style={shopCTAOverlay} />
+      {/* ── Dynamic CTA Section ─────────────────────────────────── */}
+      <section style={shopCTASection}>
+        <div style={shopCTAOverlay} />
+        {auth && auth.role === 'user' ? (
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: '640px', margin: '0 auto', padding: '0 24px' }}>
+            <span style={{ ...sectionTag, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>Premium Grooming</span>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, color: '#fff', margin: '16px 0 14px', lineHeight: 1.2, letterSpacing: '-0.03em' }}>
+              Ready for a Fresh Look?<br />Book Your Barber Today
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px' }}>
+              Browse top-rated local shops, compare service prices, and secure your perfect time slot instantly.
+            </p>
+            <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/salons" style={{ ...btnPrimary, background: '#fff', color: '#e94560' }} id="customer-explore-cta">🔍 Find Salons & Barbers</Link>
+              <Link to="/my-bookings" style={{ ...btnGhost, borderColor: 'rgba(255,255,255,0.4)', color: '#fff' }} id="customer-bookings-cta">View My Bookings</Link>
+            </div>
+          </div>
+        ) : (
           <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: '640px', margin: '0 auto', padding: '0 24px' }}>
             <span style={{ ...sectionTag, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>For Business Owners</span>
             <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, color: '#fff', margin: '16px 0 14px', lineHeight: 1.2, letterSpacing: '-0.03em' }}>
@@ -301,8 +315,8 @@ export default function LandingPage() {
               )}
             </div>
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* ── Final CTA ────────────────────────────────────────── */}
       <section style={{ ...section, textAlign: 'center', padding: '80px 24px' }}>
