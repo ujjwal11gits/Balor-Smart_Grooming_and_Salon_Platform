@@ -59,18 +59,24 @@ Balor uses two primary React Context Providers to maintain global state:
 ### A. Authentication Context (`AuthContext.jsx`)
 - **Purpose**: Tracks active user profile information (`auth`), handles initial profile loading, and coordinates login/logout processes.
 - **Session Persistence**: Reads initial session token from `localStorage` on boot.
-- **Logout flow**: Clears local variables and cookies:
+- **Logout flow**: Clears local storage variables and local state:
   ```javascript
   const logout = async () => {
     try {
       await api.post('/auth/logout'); // Clears secure HTTP-only refresh cookie
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error('Server logout failed:', err);
+    } finally {
+      localStorage.clear();
+      setAuth(null);
     }
-    setAuth(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+  };
+  ```
+- **Name Dynamic Update**: Updates the user's display name in local storage and active context dynamically when changed via the profile edit form:
+  ```javascript
+  const updateAuthName = (newName) => {
+    localStorage.setItem('name', newName);
+    setAuth((prev) => prev ? { ...prev, name: newName } : null);
   };
   ```
 
