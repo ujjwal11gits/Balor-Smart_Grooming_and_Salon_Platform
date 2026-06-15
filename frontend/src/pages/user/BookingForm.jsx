@@ -302,22 +302,22 @@ export default function BookingForm() {
                       case 'booked':
                         return { 
                           ...base, 
-                          background: 'rgba(0, 0, 0, 0.02)', 
+                          background: 'rgba(0, 0, 0, 0.01)', 
                           color: 'var(--text3)', 
                           borderColor: 'var(--border)', 
                           textDecoration: 'line-through', 
-                          opacity: 0.4, 
+                          opacity: 0.65, 
                           cursor: 'not-allowed', 
                           pointerEvents: 'none' 
                         };
                       case 'closed':
                         return { 
                           ...base, 
-                          background: 'rgba(0, 0, 0, 0.04)', 
+                          background: 'rgba(0, 0, 0, 0.02)', 
                           color: 'var(--text3)', 
                           borderColor: 'var(--border)', 
                           borderStyle: 'dashed',
-                          opacity: 0.2, 
+                          opacity: 0.45, 
                           cursor: 'not-allowed', 
                           pointerEvents: 'none' 
                         };

@@ -1079,9 +1079,9 @@ function QuickBookingDrawer({ barber, userPhone, onClose }) {
       case 'fast-filling':
         return { ...base, background: 'rgba(217, 119, 6, 0.06)', color: '#d97706', borderColor: 'rgba(217, 119, 6, 0.25)' };
       case 'booked':
-        return { ...base, background: 'rgba(0,0,0,0.02)', color: 'var(--text3)', borderColor: 'var(--border)', textDecoration: 'line-through', opacity: 0.4, cursor: 'not-allowed', pointerEvents: 'none' };
+        return { ...base, background: 'rgba(0,0,0,0.01)', color: 'var(--text3)', borderColor: 'var(--border)', textDecoration: 'line-through', opacity: 0.65, cursor: 'not-allowed', pointerEvents: 'none' };
       case 'closed':
-        return { ...base, background: 'rgba(0,0,0,0.04)', color: 'var(--text3)', borderColor: 'var(--border)', borderStyle: 'dashed', opacity: 0.2, cursor: 'not-allowed', pointerEvents: 'none' };
+        return { ...base, background: 'rgba(0,0,0,0.02)', color: 'var(--text3)', borderColor: 'var(--border)', borderStyle: 'dashed', opacity: 0.45, cursor: 'not-allowed', pointerEvents: 'none' };
       case 'available':
       default:
         return { ...base, background: 'rgba(5, 150, 105, 0.06)', color: '#059669', borderColor: 'rgba(5, 150, 105, 0.25)' };
