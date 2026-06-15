@@ -126,6 +126,7 @@ Balor uses **MongoDB** with **Mongoose**. Below are the core schemas and optimiz
 - **Review**: Maps a single customer review to an appointment (`userId`, `barberId`, `bookingId`, `rating`, `comment`). Has a unique constraint on `bookingId` to prevent duplicate reviews.
 - **Notification**: Stores user alerts (`userId`, `message`, `type`, `link`, `read` boolean).
 - **Waitlist**: Implements booking queues for fully booked slots (`userId`, `barberId`, `date`, `status`).
+- **Feedback**: Stores platform feedback and technical bug reports submitted by users or guests (`userId`, `userEmail`, `userName`, `type` (`bug`, `suggestion`, `other`), `description`, `url`, `userAgent`, `screenSize`, and `status` (`pending`, `reviewed`, `resolved`)).
 
 ### B. Database Indexing (Performance Optimization)
 To prevent heavy Collection Scans ($O(N)$), we added B-Tree indexes ($O(\log N)$) to key foreign lookup fields:
@@ -200,6 +201,12 @@ To prevent deployment lockouts for developers who host the application without c
 2. If it is NOT configured, the backend appends `testOtp` inside the JSON response payload, transmitting the generated OTP code directly to the client.
 3. If `SMTP_HOST` is configured, it sends `testOtp` as `undefined` to guarantee standard secure operations for production users.
 4. The frontend intercepts this response, saving the `testOtp` in state and displaying it within a "Test Mode" banner so the flow can be verified.
+
+### G. Public Feedback & Issue Reporting (with Guest Rate Limiting)
+Handles system feedback and technical bug reports (`POST /api/feedback`):
+1. **Spam Prevention**: Locked with a rate limiter restricting submissions to **max 3 requests per 1 hour** per IP.
+2. **Access Control**: Users logged in as non-admins can submit feedback from any page. Guests (unauthenticated users) can ONLY submit reports from auth/onboarding routes (`/login`, `/register`, `/forgot-password`, `/reset-password`). Attempts to submit from other pages are blocked with `403 Forbidden`.
+3. **Admin Alerts**: If the feedback is labeled as a `bug`, the server automatically loops through all registered admin accounts and inserts a real-time notification to pop the notification bells on their dashboard.
 
 ---
 

@@ -246,6 +246,20 @@ To replace browser fallback icons with native brand assets:
 1. Created a lightweight, high-performance [favicon.svg](file:///d:/barber_app/barber-app/frontend/public/favicon.svg) containing a scalable scissors emoji `✂️`.
 2. Loaded it inside the HTML header configuration to ensure it displays globally on all platforms and devices.
 
+### I. Interactive FAQ Section (Tabbed Collapsible Accordions)
+Provides a premium self-service Q&A interface at the bottom of the landing page:
+1. **Category Tabbing**: Features a pill-shaped segment control switching between **For Customers** and **For Salons & Barbers**, automatically resetting states.
+2. **Smooth Grid Transitions**: Accordion answers slide open using a modern CSS Grid layout transition (`grid-template-rows 0.25s` from `0fr` to `1fr`). This enables smooth height animations on content of unknown height without hardcoding values.
+3. **Rotating Chevrons**: Features a right-aligned indicator arrow `▼` that rotates 180 degrees when an item is expanded.
+4. **Theme Adaptation**: Inherits dynamic color properties (`var(--bg)`, `var(--card)`, `var(--text)`) to support light and dark theme modes flawlessly.
+
+### J. Context-Aware Feedback Drawer (Desktop Edge Tab & Mobile Drawer Button)
+Provides an issue reporting system that collects diagnostic context and changes layout responsively:
+1. **Desktop Edge-Tab**: Displays a subtle, semi-transparent tab `🪲` pinned to the right edge of the screen. Opacity increases slightly on hover, avoiding drawing excessive attention from the user.
+2. **Mobile Drawer Option**: Pinned edge-tabs are hidden on viewports `<= 768px` to prevent layout overlaps. Instead, it renders as a prominent, warning-styled action button at the bottom of the mobile hamburger menu drawer.
+3. **Spam & Validation Controls**: Submissions are disabled once clicked (`disabled={loading}`) to prevent double-submitting. Unauthenticated guests can only submit reports from auth paths (e.g. `/login`, `/register`).
+4. **Diagnostic Collection**: Automatically extracts client-side metadata (URL, browser User Agent, and screen size) to provide context for debugging.
+
 ---
 
 ## 5. Frontend Technical & System Design FAQ
