@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
   ArcElement, Title, Tooltip, Legend,
@@ -779,7 +779,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
                   }
 
                   return (
-                    <React.Fragment key={f._id}>
+                    <Fragment key={f._id}>
                       <tr 
                         onClick={() => setExpandedId(isExpanded ? null : f._id)}
                         style={{ cursor: 'pointer', transition: 'background 0.15s' }}
@@ -865,7 +865,7 @@ function FeedbackTabContent({ onStatusUpdated }) {
                           </td>
                         </tr>
                       )}
-                    </React.Fragment>
+                    </Fragment>
                   );
                 })}
               </tbody>
