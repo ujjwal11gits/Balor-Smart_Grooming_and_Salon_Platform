@@ -206,7 +206,7 @@ export default function Register() {
             <>
               <div style={{ marginBottom: '28px' }}>
                 <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontWeight: 700, fontSize: '1.1rem', textDecoration: 'none', marginBottom: '28px' }}>
-                  <span>✂</span> Balor
+                  <img src="/logo.png" alt="Balor Logo" style={{ width: '22px', height: '22px', borderRadius: '4px', objectFit: 'contain' }} /> Balor
                 </Link>
                 <h2 style={{ fontSize: '1.55rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text)' }}>Create your account</h2>
                 <p style={{ color: 'var(--text2)', marginTop: '5px', fontSize: '0.92rem' }}>Join thousands of happy users</p>

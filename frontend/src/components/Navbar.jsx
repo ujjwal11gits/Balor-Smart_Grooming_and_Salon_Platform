@@ -26,7 +26,7 @@ export default function Navbar() {
     <>
       <nav className="nav-container">
         <Link to="/" style={brandStyle} className="nav-brand">
-          <span style={scissorStyle}>✂</span>
+          <img src="/logo.png" alt="Balor Logo" style={logoImgStyle} />
           <span>Bal<span style={{ color: '#fff', fontWeight: 300 }}>or</span></span>
         </Link>
 
@@ -103,7 +103,7 @@ export default function Navbar() {
       <div className={`mobile-menu-drawer ${menuOpen ? 'open' : ''}`}>
         <div className="drawer-header">
           <Link to="/" style={brandStyle} onClick={() => setMenuOpen(false)}>
-            <span style={scissorStyle}>✂</span>
+            <img src="/logo.png" alt="Balor Logo" style={logoImgStyle} />
             <span>Bal<span style={{ color: '#fff', fontWeight: 300 }}>or</span></span>
           </Link>
           <button className="drawer-close" onClick={() => setMenuOpen(false)}>✕</button>
@@ -411,7 +411,12 @@ const brandStyle = {
   textDecoration: 'none',
   letterSpacing: '-0.01em',
 };
-const scissorStyle = { fontSize: '1rem' };
+const logoImgStyle = {
+  width: '24px',
+  height: '24px',
+  borderRadius: '4px',
+  objectFit: 'contain',
+};
 const themeBtnStyle = {
   background: 'rgba(255,255,255,0.07)',
   border: '1px solid rgba(255,255,255,0.1)',
