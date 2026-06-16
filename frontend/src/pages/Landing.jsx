@@ -427,7 +427,7 @@ export default function LandingPage() {
           {/* Column 1: Brand & Info */}
           <div style={footerCol}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <img src="/logo.png" alt="Balor Logo" style={{ width: '28px', height: '28px', borderRadius: '4px', objectFit: 'contain' }} />
+              <span style={{ color: 'var(--accent)', fontSize: '1.4rem' }}>✂</span>
               <span style={{ fontWeight: 800, color: 'var(--text)', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>Balor</span>
             </div>
             <p style={{ color: 'var(--text2)', fontSize: '0.88rem', lineHeight: 1.6, margin: 0, textAlign: 'left' }}>

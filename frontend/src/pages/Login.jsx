@@ -115,7 +115,9 @@ export default function Login() {
       {/* Left branding panel */}
       <div style={brandPanel} className="login-brand-panel">
         <div style={brandContent}>
-          <img src="/logo.png" alt="Balor Logo" style={{ width: '64px', height: '64px', borderRadius: '18px', marginBottom: '20px', boxShadow: '0 8px 32px rgba(233,69,96,0.25)' }} />
+          <div style={logoArea}>
+            <span style={{ fontSize: '2.5rem' }}>✂</span>
+          </div>
           <h1 style={brandTitle}>Balor</h1>
           <p style={brandSubtitle}>Smart Grooming & Salon Platform</p>
           <div style={featureList}>
