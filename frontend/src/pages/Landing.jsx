@@ -470,14 +470,14 @@ export default function LandingPage() {
           <div style={footerCol}>
             <h4 style={footerColTitle}>Support</h4>
             <div style={footerLinksList}>
-              <a href="mailto:contact@balorapp.com" style={footerSubLink} className="footer-sublink">
-                ✉ contact@balorapp.com
+              <a href="mailto:ujjwalakash11@gmail.com" style={footerSubLink} className="footer-sublink">
+                ✉ ujjwalakash11@gmail.com
               </a>
-              <a href="tel:+18005554247" style={footerSubLink} className="footer-sublink">
-                📞 +1 (800) 555-HAIR
+              <a href="tel:+917463937140" style={footerSubLink} className="footer-sublink">
+                📞 +91 74639 37140
               </a>
               <span style={{ color: 'var(--text2)', fontSize: '0.88rem', lineHeight: 1.6 }}>
-                📍 Metro Plaza, City Center
+                📍 Siwan, Bihar 841226
               </span>
             </div>
           </div>

@@ -11,6 +11,8 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 import Salons from './pages/user/Salons';
 import SalonDetail from './pages/user/SalonDetail';
@@ -50,6 +52,8 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
 
             <Route path="/salons" element={<ProtectedRoute role="user"><Salons /></ProtectedRoute>} />
             <Route path="/salons/:id" element={<ProtectedRoute role={['user', 'shop']}><SalonDetail /></ProtectedRoute>} />
