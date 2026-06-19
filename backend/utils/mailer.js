@@ -87,7 +87,7 @@ async function sendMail({ to, subject, html }, retries = 4) {
     try {
       const t = await getTransporter();
       const info = await t.sendMail({
-        from: `"Balor" <${process.env.SMTP_USER || 'noreply@balor.app'}>`,
+        from: `"Balor" <${process.env.MAIL_FROM || process.env.SMTP_USER || 'noreply@balor.app'}>`,
         to,
         subject,
         html,
