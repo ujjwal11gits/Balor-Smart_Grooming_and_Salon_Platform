@@ -3,7 +3,7 @@ const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
 const { protect, requireRole } = require('../middleware/auth');
 const User = require('../models/User');
-const { sendMail, sendMailBackground, sendMailsStaggered } = require('../utils/mailer');
+const { sendMail, sendMailBackground, sendMailsStaggered, getEmailTemplate } = require('../utils/mailer');
 const { notifyBookingStatusChange } = require('../utils/bookingAlerts');
 const Waitlist = require('../models/Waitlist');
 
@@ -75,10 +75,23 @@ router.post('/', protect, requireRole('user'), async (req, res) => {
         // 3. Email receipt to customer
         const user = await User.findById(userId).select('email name');
         if (user?.email) {
+          const detailHtml = `
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 6px 0; color: #888; border-bottom: 1px solid #f0f0f0;">Service:</td><td style="padding: 6px 0; font-weight: 600; text-align: right; border-bottom: 1px solid #f0f0f0;">${booking.service}</td></tr>
+              <tr><td style="padding: 6px 0; color: #888; border-bottom: 1px solid #f0f0f0;">Date:</td><td style="padding: 6px 0; font-weight: 600; text-align: right; border-bottom: 1px solid #f0f0f0;">${dateStr}</td></tr>
+              <tr><td style="padding: 6px 0; color: #888; border-bottom: 1px solid #f0f0f0;">Time Slot:</td><td style="padding: 6px 0; font-weight: 600; text-align: right; border-bottom: 1px solid #f0f0f0;">${booking.timeSlot}</td></tr>
+              <tr><td style="padding: 6px 0; color: #888;">Price:</td><td style="padding: 6px 0; font-weight: 600; text-align: right; color: #e94560;">$${booking.price}</td></tr>
+            </table>
+          `;
           emailsToSend.push({
             to: user.email,
             subject: 'Booking Received — Balor',
-            html: `<p>Hi ${user.name}, your booking for <b>${booking.service}</b> on <b>${dateStr}</b> at <b>${booking.timeSlot}</b> has been received and is currently <b>pending review</b>.</p>`,
+            html: getEmailTemplate({
+              userName: user.name,
+              title: 'Booking Received',
+              intro: `Your booking has been received and is currently <strong>pending review</strong>. We will notify you as soon as the salon confirms your slot.`,
+              detailHtml
+            }),
           });
         }
 
@@ -348,23 +361,24 @@ router.post('/:id/send-completion-otp', protect, requireRole('barber', 'shop', '
     let emailSent = false;
     if (booking.userId?.email) {
       try {
+        const detailHtml = `
+          <div style="text-align: center; margin: 16px 0;">
+            <div style="font-size: 13px; color: #888; margin-bottom: 8px;">Share this 4-digit code with the salon to confirm completion:</div>
+            <div style="font-size: 2.2rem; font-weight: 900; letter-spacing: 0.2em; color: #e94560; background-color: #fff; border: 2px dashed #e94560; padding: 12px 24px; border-radius: 12px; display: inline-block;">
+              ${otp}
+            </div>
+          </div>
+        `;
         await sendMail({
           to: booking.userId.email,
           subject: 'Service Completion OTP — Balor',
-          html: `
-            <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-              <h2 style="color:#e94560">&#9986; Balor</h2>
-              <p>Hi <strong>${booking.userId.name}</strong>,</p>
-              <p>Your service with barber <strong>${booking.barberId?.name || 'Staff'}</strong> at <strong>${booking.salonId?.name || 'our salon'}</strong> is almost complete!</p>
-              <p>Please share the 4-digit OTP below with the salon to confirm the completion of your service:</p>
-              <div style="text-align:center;margin:24px 0">
-                <span style="font-size:2rem;font-weight:900;letter-spacing:0.18em;color:#111;background:#f4f4f4;padding:12px 24px;border-radius:10px;display:inline-block">${otp}</span>
-              </div>
-              <p style="color:#666;font-size:0.9rem">If you are not at the salon right now, do not share this OTP.</p>
-              <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-              <p style="color:#aaa;font-size:0.8rem">&copy; ${new Date().getFullYear()} Balor &mdash; Smart Grooming & Salon Platform</p>
-            </div>
-          `,
+          html: getEmailTemplate({
+            userName: booking.userId.name,
+            title: 'Confirm Service Completion',
+            intro: `Your service with barber <strong>${booking.barberId?.name || 'Staff'}</strong> at <strong>${booking.salonId?.name || 'our salon'}</strong> is almost complete!`,
+            detailHtml,
+            footerText: 'If you are not at the salon right now, please do not share this OTP with anyone.'
+          }),
         });
         emailSent = true;
         console.log(`[BOOKING] ✅ Completion OTP sent to ${booking.userId.email}`);

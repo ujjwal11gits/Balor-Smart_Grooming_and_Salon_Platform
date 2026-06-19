@@ -159,4 +159,38 @@ function sendMailsStaggeredBackground(emails, delayMs = 1200) {
   });
 }
 
-module.exports = { sendMail, sendMailBackground, sendMailsStaggered, sendMailsStaggeredBackground };
+/**
+ * Generate a premium, beautiful HTML email template.
+ */
+function getEmailTemplate({ userName, title, intro, detailHtml, footerText }) {
+  return `
+    <div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #f0f0f0; border-radius: 16px; background-color: #ffffff; color: #333333; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 24px; font-weight: 800; color: #e94560; letter-spacing: 1px; display: inline-block;">&#9986; Balor</span>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-top: 4px;">Smart Grooming & Salon</div>
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin: 0 0 16px 0;">${title}</h2>
+        <p style="font-size: 15px; line-height: 1.6; color: #555555; margin: 0 0 16px 0;">Hi <strong>${userName}</strong>,</p>
+        <p style="font-size: 15px; line-height: 1.6; color: #555555; margin: 0 0 20px 0;">${intro}</p>
+      </div>
+
+      ${detailHtml ? `
+      <div style="background-color: #f8f9fa; border-radius: 12px; padding: 18px; margin-bottom: 24px; border-left: 4px solid #e94560;">
+        ${detailHtml}
+      </div>
+      ` : ''}
+
+      ${footerText ? `<p style="font-size: 13px; color: #666666; line-height: 1.5; margin: 0 0 24px 0;">${footerText}</p>` : ''}
+
+      <hr style="border: none; border-top: 1px solid #eaeaea; margin: 24px 0;" />
+      <div style="text-align: center;">
+        <p style="color: #999999; font-size: 12px; margin: 0 0 8px 0;">This is an automated email from Balor. Please do not reply.</p>
+        <p style="color: #bbbbbb; font-size: 11px; margin: 0;">&copy; ${new Date().getFullYear()} Balor &mdash; All Rights Reserved.</p>
+      </div>
+    </div>
+  `;
+}
+
+module.exports = { sendMail, sendMailBackground, sendMailsStaggered, sendMailsStaggeredBackground, getEmailTemplate };

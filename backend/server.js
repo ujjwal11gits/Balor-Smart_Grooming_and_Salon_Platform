@@ -10,6 +10,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Trust proxy (required for express-rate-limit behind Nginx/Cloudflare)
+app.set('trust proxy', 1);
+
 // Set secure HTTP headers
 app.use(helmet());
 
