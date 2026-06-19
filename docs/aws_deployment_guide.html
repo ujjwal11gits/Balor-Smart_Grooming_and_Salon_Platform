@@ -286,15 +286,15 @@ sudo npm install -g pm2</code></pre>
 # Write environment variables
 cat << 'EOF' > .env
 PORT=5000
-MONGO_URI=mongodb+srv://competeujjwal_db_user:i.am.11.using.mongoDB@cluster0.sbr0vyp.mongodb.net/Balor_DB?appName=Cluster0
-JWT_SECRET=MY_JWT_SECRET
-JWT_REFRESH_SECRET=your_refresh_secret_change_in_production
-FRONTEND_URL=https://balor.ujjwalchoubey.me
+MONGO_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_secret_key
+JWT_REFRESH_SECRET=your_refresh_secret
+FRONTEND_URL=https://your-domain-or-ip
 
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=ujjwalakash11@gmail.com
-SMTP_PASS=kjkyvljqxuxuaqav
+SMTP_USER=example@gmail.com
+SMTP_PASS=app_password_here
 SESSION_EXPIRY_DAYS=30
 EOF
 
