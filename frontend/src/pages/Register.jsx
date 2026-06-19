@@ -171,10 +171,8 @@ export default function Register() {
     setOtpError('');
     setVerifying(true);
     try {
-      const { data } = await api.post('/auth/verify-otp', { tempToken, otp: code });
-      login(data);
-      if (data.role === 'shop') navigate('/shop/dashboard');
-      else navigate('/');
+      await api.post('/auth/verify-otp', { tempToken, otp: code });
+      setStep('success');
     } catch (err) {
       setOtpError(err.response?.data?.message || 'Verification failed');
       setOtp(['', '', '', '', '', '']);
@@ -218,19 +216,19 @@ export default function Register() {
                 <div className="register-form-grid">
                   <div className="field-group">
                     <label className="field-label">Full Name</label>
-                    <input className={`field-input ${fieldErrors.name ? 'input-error' : ''}`} placeholder="John Doe" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                    <input className={`field-input ${fieldErrors.name ? 'input-error' : ''}`} placeholder="John Doe" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoComplete="off" required />
                     {fieldErrors.name && <span style={errorTextStyle}>{fieldErrors.name}</span>}
                   </div>
                   <div className="field-group">
                     <label className="field-label">Phone</label>
-                    <input className={`field-input ${fieldErrors.phone ? 'input-error' : ''}`} placeholder="+91 99999 00000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                    <input className={`field-input ${fieldErrors.phone ? 'input-error' : ''}`} placeholder="+91 99999 00000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} autoComplete="tel" />
                     {fieldErrors.phone && <span style={errorTextStyle}>{fieldErrors.phone}</span>}
                   </div>
                 </div>
 
                 <div className="field-group">
                   <label className="field-label">Email</label>
-                  <input className={`field-input ${fieldErrors.email ? 'input-error' : ''}`} type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                  <input className={`field-input ${fieldErrors.email ? 'input-error' : ''}`} type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} autoComplete="off" required />
                   {fieldErrors.email && <span style={errorTextStyle}>{fieldErrors.email}</span>}
                 </div>
 
@@ -244,6 +242,7 @@ export default function Register() {
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       style={{ paddingRight: '40px' }}
+                      autoComplete="new-password"
                       required
                     />
                     <button
@@ -297,7 +296,7 @@ export default function Register() {
                     <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--accent)', fontWeight: 600 }}>🏪 Salon Details</p>
                     <div className="field-group" style={{ margin: 0 }}>
                       <label className="field-label">Salon Name</label>
-                      <input className={`field-input ${fieldErrors.salonName ? 'input-error' : ''}`} placeholder="e.g. Classic Cuts Barbershop" value={form.salonName} onChange={(e) => setForm({ ...form, salonName: e.target.value })} required={form.role === 'shop'} />
+                      <input className={`field-input ${fieldErrors.salonName ? 'input-error' : ''}`} placeholder="e.g. Classic Cuts Barbershop" value={form.salonName} onChange={(e) => setForm({ ...form, salonName: e.target.value })} autoComplete="off" required={form.role === 'shop'} />
                       {fieldErrors.salonName && <span style={errorTextStyle}>{fieldErrors.salonName}</span>}
                     </div>
                     <div className="field-group" style={{ margin: 0 }}>
@@ -323,17 +322,17 @@ export default function Register() {
                           {locating ? '⏳ Locating...' : '📍 Use Current Location'}
                         </button>
                       </div>
-                      <input className={`field-input ${fieldErrors.salonAddress ? 'input-error' : ''}`} placeholder="e.g. Flat/Room No, Building, Street" value={form.salonAddress} onChange={(e) => setForm({ ...form, salonAddress: e.target.value })} required={form.role === 'shop'} />
+                      <input className={`field-input ${fieldErrors.salonAddress ? 'input-error' : ''}`} placeholder="e.g. Flat/Room No, Building, Street" value={form.salonAddress} onChange={(e) => setForm({ ...form, salonAddress: e.target.value })} autoComplete="off" required={form.role === 'shop'} />
                       {fieldErrors.salonAddress && <span style={errorTextStyle}>{fieldErrors.salonAddress}</span>}
                     </div>
                     <div className="field-group" style={{ margin: 0 }}>
                       <label className="field-label">City / Area</label>
-                      <input className={`field-input ${fieldErrors.salonCity ? 'input-error' : ''}`} placeholder="e.g. Siwan" value={form.salonCity} onChange={(e) => setForm({ ...form, salonCity: e.target.value })} required={form.role === 'shop'} />
+                      <input className={`field-input ${fieldErrors.salonCity ? 'input-error' : ''}`} placeholder="e.g. Siwan" value={form.salonCity} onChange={(e) => setForm({ ...form, salonCity: e.target.value })} autoComplete="off" required={form.role === 'shop'} />
                       {fieldErrors.salonCity && <span style={errorTextStyle}>{fieldErrors.salonCity}</span>}
                     </div>
                     <div className="field-group" style={{ margin: 0 }}>
                       <label className="field-label">Registration ID (Optional)</label>
-                      <input className="field-input" placeholder="e.g. REG-123456" value={form.salonRegId} onChange={(e) => setForm({ ...form, salonRegId: e.target.value })} />
+                      <input className="field-input" placeholder="e.g. REG-123456" value={form.salonRegId} onChange={(e) => setForm({ ...form, salonRegId: e.target.value })} autoComplete="off" />
                     </div>
                   </div>
                 )}
@@ -393,13 +392,28 @@ export default function Register() {
               </form>
 
               <p style={{ textAlign: 'center', color: 'var(--text2)', fontSize: '0.87rem', marginTop: '20px' }}>
-                Didn't receive it?{' '}
-                {resendCooldown > 0
-                  ? <span style={{ color: 'var(--text3)' }}>Resend in {resendCooldown}s</span>
-                  : <span style={{ color: 'var(--text3)' }}>Please restart registration to try again.</span>
-                }
+                 Didn't receive it?{' '}
+                 {resendCooldown > 0
+                   ? <span style={{ color: 'var(--text3)' }}>Resend in {resendCooldown}s</span>
+                   : <span style={{ color: 'var(--text3)' }}>Please restart registration to try again.</span>
+                 }
               </p>
             </>
+          )}
+
+          {step === 'success' && (
+            <div style={{ textAlign: 'center', padding: '10px 0' }}>
+              <div style={successIconWrap}>✨</div>
+              <h2 style={{ fontSize: '1.65rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text)', margin: '18px 0 8px' }}>
+                Account Verified!
+              </h2>
+              <p style={{ color: 'var(--text2)', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '28px' }}>
+                Your account has been successfully registered. You can now log in to access your dashboard.
+              </p>
+              <Link to="/login" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '12px', fontSize: '0.95rem', textDecoration: 'none', fontWeight: 600, boxSizing: 'border-box' }}>
+                Go to Login
+              </Link>
+            </div>
           )}
         </div>
       </div>
@@ -538,4 +552,10 @@ const errorTextStyle = {
   marginTop: '4px',
   fontWeight: 500,
   textAlign: 'left',
+};
+
+const successIconWrap = {
+  width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16,185,129,0.1)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem',
+  margin: '0 auto', color: '#10b981',
 };
