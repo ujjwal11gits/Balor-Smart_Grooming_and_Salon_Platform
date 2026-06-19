@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balor — Backend System Architecture & Design Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #0f766e; /* Dark teal theme for Backend */
+            --primary-hover: #115e59;
+            --accent: #d97706;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --alert-teal-bg: #f0fdfa;
+            --alert-teal-border: #ccfbf1;
+            --alert-teal-text: #134e4a;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-top: 40px;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 0.96rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.88rem;
+            border: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .why-box {
+            background-color: var(--alert-teal-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .why-box strong {
+            color: var(--alert-teal-text);
+        }
+
+        .why-box p {
+            margin: 5px 0 0 0;
+            color: var(--alert-teal-text);
+            font-size: 0.92rem;
+        }
+
+        .faq-item {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 8px 0;
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.94rem;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            pre {
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+            .why-box {
+                background: #f1f5f9;
+                border-left: 4px solid #475569;
+            }
+            .why-box p, .why-box strong {
+                color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Balor — Backend System Architecture & Design Guide</h1>
+        <p>This guide details the complete backend implementation of the Balor grooming booking system, detailing all design patterns, directory configurations, security systems, database designs, and core business logics.</p>
+
+        <h2>1. Folder Architecture & Entry Points</h2>
+        <p>The backend follows a modular, RESTful design built with <strong>Node.js</strong>, <strong>Express.js</strong>, and <strong>Mongoose</strong>.</p>
+
+        <h3>Directory Structure</h3>
+        <pre><code>backend/
+├── middleware/
+│   └── auth.js              # Authentication and authorization guards (JWT + Role Checks)
+├── models/
+│   ├── User.js              # User details, passwords, dynamic OTPs and roles
+│   ├── Salon.js             # Salon schema containing subdocuments for services and barbers
+│   ├── Barber.js            # Barber schemas, ratings, working slots, and leaves
+│   ├── Booking.js           # Appointment details, price, duration, and OTP status
+│   ├── Review.js            # Star ratings, comments, and reference relations
+│   ├── Notification.js      # In-app user notifications history
+│   └── Waitlist.js          # Booking waitlist for fully booked slots
+├── routes/
+│   ├── auth.js              # Registration OTP verification, Login, and OTP Password Resets
+│   ├── salons.js            # Customer-facing searches, location geolocation, and detail pages
+│   ├── barbers.js           # Barber queries, working slots, and slot calculations
+│   ├── bookings.js          # Booking reservations, cancels, and OTP-based completions
+│   ├── reviews.js           # Review creation and barber-to-salon rating sync
+│   ├── notifications.js     # User notification retrievals and reads
+│   ├── users.js             # Profile updates and customer favorites management
+│   ├── admin.js             # Platform-wide statistics, user lists, and booking controls
+│   ├── shop.js              # Shop owner configs, services management, and staff updates
+│   └── waitlist.js          # Queue waitlist operations
+├── utils/
+│   └── mailer.js            # SMTP email services (Nodemailer, Gmail, and Ethereal)
+├── .env                     # Production environment variables (credentials hidden)
+├── dev-server.js            # Development server runner equipped with Nodemon
+└── server.js                # Global app entry point, loading express and middlewares</code></pre>
+
+        <h3>Entry Points Explanation</h3>
+        <ul>
+            <li><strong><code>server.js</code></strong>: Initializes the database, loads global security tools (Helmet, CORS, cookie parsers), registers API routing controllers, and contains the fallback global error handling middleware.</li>
+            <li><strong><code>dev-server.js</code></strong>: Imports the configured server and listens on `PORT` dynamically, allowing hot-reloads using nodemon.</li>
+        </ul>
+
+        <h2>2. Security Hardening & Middlewares</h2>
+
+        <h3>A. HTTP Headers Hardening (<code>helmet</code>)</h3>
+        <pre><code>app.use(helmet());</code></pre>
+
+        <h3>B. Restricted Cross-Origin Requests (CORS)</h3>
+        <pre><code>app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true // Crucial: Permits secure browser cookie transmissions
+}));</code></pre>
+
+        <h3>C. Authentication Rate Limiter (<code>express-rate-limit</code>)</h3>
+        <pre><code>const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 requests per window
+  message: { message: "Too many authentication requests, please try again after 15 minutes." }
+});</code></pre>
+
+        <h3>D. JWT Verification Middleware (<code>middleware/auth.js</code>)</h3>
+        <pre><code>module.exports = (allowedRoles = []) => {
+  return (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Access token missing' });
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded; // Contains id, email, and role
+      
+      // If role checks are defined, enforce them
+      if (allowedRoles.length && !allowedRoles.includes(decoded.role)) {
+        return res.status(403).json({ message: 'Forbidden: Access denied' });
+      }
+      next();
+    } catch (err) {
+      return res.status(401).json({ message: 'Access token expired or invalid' });
+    }
+  };
+};</code></pre>
+
+        <h3>E. Global JSON Error Formatting</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Prevents default HTML stack trace leaks which expose folder trees and database variables to potential attackers.</p>
+        </div>
+        <pre><code>app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'An unexpected internal server error occurred.',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});</code></pre>
+
+        <h2>3. Database Schema Design & Indexing</h2>
+
+        <h3>A. Database Indexing (Performance Optimization)</h3>
+        <p>To avoid collection scans, we apply B-Tree indexes to all foreign key lookups ($O(\log N)$ instead of $O(N)$ lookup complexity):</p>
+        <pre><code>bookingSchema.index({ userId: 1 });
+bookingSchema.index({ barberId: 1 });
+bookingSchema.index({ salonId: 1 });
+bookingSchema.index({ date: 1 });
+barberSchema.index({ salonId: 1 });
+salonSchema.index({ ownerId: 1 });
+waitlistSchema.index({ barberId: 1, date: 1 }); // Compound Index</code></pre>
+
+        <h2>4. Core API Routes & Business Logic</h2>
+
+        <h3>A. Auth Flow & Session Management (HttpOnly Cookie Rotation)</h3>
+        <p>Splits JWT tokens: Generates short-lived <strong>Access Tokens</strong> returned in JSON payload for client consumption, and long-lived <strong>Refresh Tokens</strong> mapped strictly inside secure, HTTP-only cookies to prevent XSS-based hijacking.</p>
+
+        <h3>B. Dynamic Time-Slot Calculations</h3>
+        <p>Checks requested booking dates against barber configuration slots and leaves, scans active database bookings, dynamically blocks off target duration sizes, and filters out already passed slot values relative to current timezones.</p>
+
+        <h3>C. Rating Recalculation & Salon Subdocument Sync</h3>
+        <p>Submitting a review triggers an aggregate recalculation of the barber's average rating. Mongoose immediately updates the <code>Barber</code> collection, and updates the embedded barber profile subdocument array inside the parent <code>Salon</code> document, keeping landing page queries fast.</p>
+
+        <h2>5. Backend Technical & System Design FAQ</h2>
+        <div class="faq-item">
+            <p class="faq-question">Q1: Why do you store the Refresh Token in an HttpOnly cookie instead of LocalStorage?</p>
+            <p class="faq-answer"><strong>Answer:</strong> LocalStorage is vulnerable to XSS. If a script injection exploit occurs, malicious code can steal the keys. HttpOnly cookies cannot be read by browser JavaScript, blocking script-based theft.</p>
+        </div>
+        <div class="faq-item">
+            <p class="faq-question">Q2: Explain how the backend calculates wait times.</p>
+            <p class="faq-answer"><strong>Answer:</strong> It counts active bookings scheduled for today that are pending or confirmed up to the current time, multiplying that count by an average service time multiplier (30 minutes).</p>
+        </div>
+        <div class="faq-item">
+            <p class="faq-question">Q3: What are MongoDB subdocuments and why did you use them in the Salon schema?</p>
+            <p class="faq-answer"><strong>Answer:</strong> Subdocuments are schemas nested inside a parent document. In this project, `Salon` embeds arrays of `services` and `barbers`. We used this because these arrays are queried on every detail page load; embedding them gets all details in a single database lookup instead of doing multiple collection joins.</p>
+        </div>
+    </div>
+</body>
+</html>

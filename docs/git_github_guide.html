@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git & GitHub Guide - Balor Salon Project</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #f97316; /* Orange theme for Git */
+            --primary-hover: #ea580c;
+            --accent: #ef4444;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --alert-orange-bg: #fff7ed;
+            --alert-orange-border: #ffedd5;
+            --alert-orange-text: #c2410c;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 40px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .why-box {
+            background-color: var(--alert-orange-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .why-box strong {
+            color: var(--alert-orange-text);
+        }
+
+        .why-box p {
+            margin: 5px 0 0 0;
+            color: var(--alert-orange-text);
+            font-size: 0.95rem;
+        }
+
+        .conflict-header {
+            color: #b91c1c;
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            pre {
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+            .why-box {
+                background: #f1f5f9;
+                border-left: 4px solid #475569;
+            }
+            .why-box p, .why-box strong {
+                color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Git & GitHub Guide</h1>
+        <p>A practical, beginner-friendly manual using the Balor Salon project as reference.</p>
+
+        <h2>📂 1. The Core Concept (Game Save System Analogy)</h2>
+        <ul>
+            <li><strong>Working Directory:</strong> Your folder on your laptop (e.g. <code>D:\Balor-Smart_Grooming_and_Salon_Platform</code>).</li>
+            <li><strong>Staging Area:</strong> Picking which files to include in your next save point (<code>git add</code>).</li>
+            <li><strong>Commit:</strong> Creating a permanent save point in history with a label (<code>git commit</code>).</li>
+            <li><strong>Push:</strong> Uploading your local save files to the cloud on GitHub (<code>git push</code>).</li>
+            <li><strong>Pull:</strong> Downloading someone else's edits from GitHub to your laptop (<code>git pull</code>).</li>
+        </ul>
+
+        <h2>🌿 2. Working with Branches (Parallel Workspaces)</h2>
+        <div class="why-box">
+            <strong>Why we use branches:</strong>
+            <p>Branches let you code new features (like a payment module) safely in a parallel space without breaking the working code on your <code>main</code> branch.</p>
+        </div>
+        <pre><code># Check current active branch
+git branch
+
+# Create and switch to a new branch 'add-payments'
+git checkout -b add-payments
+
+# Switch back to 'main'
+git checkout main</code></pre>
+
+        <h2>📤 3. Daily Command Loop</h2>
+        <p>Run these commands on your computer to save work and sync it to GitHub:</p>
+        <pre><code># Step A: Check changed files
+git status
+
+# Step B: Stage changes
+git add .
+
+# Step C: Commit save state
+git commit -m "feat: added barber shop details page"
+
+# Step D: Sync online
+git push origin main</code></pre>
+
+        <h2>🤝 4. Merging Branches</h2>
+        <p>When your feature on <code>add-payments</code> works perfectly and you want to combine it with <code>main</code>:</p>
+        <pre><code>git checkout main
+git merge add-payments
+git push origin main</code></pre>
+
+        <h2>💥 5. Merge Conflicts (How to Fix)</h2>
+        <div class="conflict-header">
+            What is a Merge Conflict?
+        </div>
+        <p>A conflict happens when the exact same line of code in the same file is changed differently in two places, and Git doesn't know which version to keep.</p>
+        
+        <h3>Balor Project Example:</h3>
+        <p>Inside <code>backend/utils/mailer.js</code>, you changed line 10 to Gmail on <code>main</code>, but someone changed line 10 to Brevo on the feature branch. During merge, Git halts and inserts conflict indicators:</p>
+        
+        <pre><code><<<<<<< HEAD
+const host = 'smtp.gmail.com'; // Your version on main
+=======
+const host = 'smtp.brevo.com';  // Version from the add-emails branch
+>>>>>>> add-emails</code></pre>
+
+        <h3>How to Resolve:</h3>
+        <ol>
+            <li>Open the file in **VS Code**.</li>
+            <li>Use the GUI buttons to select *"Accept Current Change"* (Gmail), *"Accept Incoming"* (Brevo), or edit it manually to choose one and delete the indicator lines (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>).</li>
+            <li>Run the commands to save:
+                <pre><code>git add backend/utils/mailer.js
+git commit -m "fix: resolved mailer host merge conflict"
+git push origin main</code></pre>
+            </li>
+        </ol>
+
+        <h2>🛡️ 6. Undoing and Stashing</h2>
+        <ul>
+            <li><strong>Undo local unsaved edits in mailer.js:</strong>
+                <pre><code>git checkout -- backend/utils/mailer.js</code></pre>
+            </li>
+            <li><strong>Temporarily shelve your current edits to fix a bug on another branch:</strong>
+                <pre><code>git stash       # saves edits and cleans workspace
+# ... do other work ...
+git stash pop   # brings back your shelved edits</code></pre>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend & Backend Architecture Guide - Balor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #0d9488; /* Teal theme for Architecture */
+            --primary-hover: #0f766e;
+            --accent: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --alert-teal-bg: #f0fdfa;
+            --alert-teal-border: #ccfbf1;
+            --alert-teal-text: #115e59;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 40px;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .architecture-card {
+            background-color: var(--alert-teal-bg);
+            border: 1px solid var(--alert-teal-border);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .architecture-card h4 {
+            margin: 0 0 10px 0;
+            color: var(--alert-teal-text);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .architecture-card p {
+            margin: 0;
+            color: var(--alert-teal-text);
+            font-size: 0.95rem;
+        }
+
+        .diagram-box {
+            background-color: #fafafa;
+            border: 1px dashed #a8a29e;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            margin: 20px 0;
+            color: #44403c;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            pre {
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+            .architecture-card {
+                background: #f1f5f9;
+                border: 1px solid #cbd5e1;
+            }
+            .architecture-card p, .architecture-card h4 {
+                color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Balor: System Architecture Guide</h1>
+        <p>A detailed explanation of the frontend and backend architectures, database modeling, and communication protocols.</p>
+
+        <h2>📐 1. System Overview</h2>
+        <p>The **Balor Salon Platform** is built using a decoupled Client-Server architecture. The React frontend handles the presentation, state management, and user interaction, while the Node.js/Express backend handles business logic, security, scheduling algorithms, and database operations.</p>
+        
+        <div class="diagram-box">
+            [Browser / Client] <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼ (HTTPS / JSON API Requests)<br>
+            [Nginx Web Server / Reverse Proxy]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── (Port 80/443: Serves React Static Files)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── (Port 5000 /api: Proxies to Node.js Backend)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Node.js Express App]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── (Mongoose ODM) &rarr; [MongoDB Atlas]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── (Nodemailer SMTP) &rarr; [Gmail SMTP]
+        </div>
+
+        <h2>🎨 2. Frontend Architecture (React / Vite)</h2>
+        <p>The frontend is a Single-Page Application (SPA) designed for speed, using component-driven development.</p>
+        
+        <h3>A. Project Directory Structure</h3>
+        <ul>
+            <li><code>/src/api/</code>: Contains global configuration for HTTP clients (Axios).</li>
+            <li><code>/src/components/</code>: Reusable UI layout elements (Navbar, Modals, Cards, Buttons).</li>
+            <li><code>/src/context/</code>: Global State Management (AuthContext handles user logins, roles, and cookies).</li>
+            <li><code>/src/pages/</code>: Role-specific sub-dashboards (Customer, Barber, Owner, Admin).</li>
+            <li><code>/src/utils/</code>: Shared helper functions (dates formatting, validation).</li>
+        </ul>
+
+        <div class="architecture-card">
+            <h4>JWT Access Token Handling (Axios Interceptors)</h4>
+            <p>To avoid security vulnerabilities, access tokens are stored in memory and attached automatically to requests. If a request returns a <code>401 Unauthorized</code> (token expired), a custom Axios interceptor automatically hits the backend <code>/auth/refresh</code> endpoint to fetch a new token via HTTP-only cookies and retries the original request seamlessly.</p>
+        </div>
+
+        <h2>⚙️ 3. Backend Architecture (Node.js / Express)</h2>
+        <p>The backend is modular, relying on the classic Controller-Route-Model pattern to ensure clean separation of concerns.</p>
+
+        <h3>A. Layered Responsibility</h3>
+        <ul>
+            <li><strong>Router Layer (<code>routes/</code>):</strong> Parses incoming URLs and assigns them to controller actions.</li>
+            <li><strong>Controller Layer (business logic):</strong> Contains functions executing specific actions (e.g. booking a slot, registering a shop).</li>
+            <li><strong>Middleware Layer:</strong>
+                <ul>
+                    <li><code>authMiddleware.js</code>: Verifies JWT tokens and checks user roles (Customer, Owner, Barber, Admin).</li>
+                    <li><code>errorHandler.js</code>: Catches exceptions and returns standardized JSON errors.</li>
+                </ul>
+            </li>
+            <li><strong>Model Layer (<code>models/</code>):</strong> Connects directly to MongoDB, enforcing schemas and data relationships.</li>
+        </ul>
+
+        <h2>💾 4. Database Modeling & Relationships</h2>
+        <p>Although MongoDB is NoSQL, our platform relies on relational model binding using Mongoose Object IDs (<code>ref</code>):</p>
+        
+        <div class="diagram-box">
+            [User (Customer, Owner, Barber)] <br>
+            &nbsp;&nbsp;&nbsp;│ 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▲ 1<br>
+            &nbsp;&nbsp;&nbsp;▼ N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ N<br>
+            [Booking] &rarr; [Barber] &rarr; [Salon]
+        </div>
+
+        <h3>Data Binding Flow:</h3>
+        <ul>
+            <li><strong>Users Schema:</strong> Stores credentials, name, email, contact, and role.</li>
+            <li><strong>Salon Schema:</strong> Owned by a <code>User</code> (Owner role), contains working hours, address, and list of offered services.</li>
+            <li><strong>Barber Schema:</strong> Bound to a <code>Salon</code> (Object ID reference) and belongs to a <code>User</code> (Barber role), keeping track of their personal schedule.</li>
+            <li><strong>Booking Schema:</strong> Relates a <code>Customer</code> (User Object ID), a <code>Salon</code>, a selected <code>Barber</code>, and specific services, recording start/end timings and status.</li>
+        </ul>
+
+        <h2>📧 5. Integration Services</h2>
+        <ul>
+            <li><strong>Secure Authentication:</strong> Double JWT token authentication (Short-lived access token + long-lived secure HttpOnly refresh cookies) preventing XSS and CSRF attacks.</li>
+            <li><strong>Transactional Emails:</strong> Integrates Nodemailer utilizing Gmail secure SMTP relays to fire booking confirmation emails, cancellation alerts, and owner notifications.</li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel & Render Deployment Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #8b5cf6; /* Violet theme for Vercel/Render */
+            --primary-hover: #7c3aed;
+            --accent: #ec4899;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --alert-purple-bg: #faf5ff;
+            --alert-purple-border: #e9d5ff;
+            --alert-purple-text: #6b21a8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 40px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .why-box {
+            background-color: var(--alert-purple-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .why-box strong {
+            color: var(--alert-purple-text);
+        }
+
+        .why-box p {
+            margin: 5px 0 0 0;
+            color: var(--alert-purple-text);
+            font-size: 0.95rem;
+        }
+
+        .placeholder-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .placeholder-table th, .placeholder-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .placeholder-table th {
+            background-color: #f1f5f9;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            pre {
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+            .why-box {
+                background: #f1f5f9;
+                border-left: 4px solid #475569;
+            }
+            .why-box p, .why-box strong {
+                color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vercel & Render Deployment Guide</h1>
+        <p>Step-by-step documentation for deploying frontend on Vercel and backend API on Render.</p>
+
+        <h2>🛠️ Prerequisites</h2>
+        <ul>
+            <li>Accounts on **Vercel** and **Render** connected to your GitHub profile.</li>
+            <li>Your codebase uploaded to a GitHub repository.</li>
+            <li>A hosted database connection string (e.g. MongoDB Atlas).</li>
+        </ul>
+
+        <h2>📋 Placeholders vs. Project Examples</h2>
+        <table class="placeholder-table">
+            <thead>
+                <tr>
+                    <th>Placeholder</th>
+                    <th>Vercel Application</th>
+                    <th>Render Web Service</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Domain Name</strong></td>
+                    <td><code>https://barber-app-frontend.vercel.app</code></td>
+                    <td><code>https://barber-app-backend.onrender.com</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Repository URL</strong></td>
+                    <td colspan="2"><code>https://github.com/ujjwal11gits/Balor-Smart_Grooming_and_Salon_Platform.git</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+        <h2>🎨 Phase 1: Deploying Frontend to Vercel</h2>
+
+        <h3>Step 1: Configure Client-Side Routing</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>React uses client-side routing. We write a <code>vercel.json</code> file to tell Vercel to route all server URL requests back to <code>index.html</code> so that page reloads on paths like <code>/dashboard</code> do not throw 404 errors.</p>
+        </div>
+        <p>Create a file named <code>vercel.json</code> inside your <code>frontend/</code> root folder:</p>
+        <pre><code>{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}</code></pre>
+
+        <h3>Step 2: Connect and Configure Build on Vercel</h3>
+        <ul>
+            <li>Go to the Vercel Dashboard, click <strong>Add New</strong> &rarr; <strong>Project</strong>.</li>
+            <li>Import your Git repository.</li>
+            <li>Under **Project Configuration**:
+                <ul>
+                    <li>Framework Preset: <strong>Vite</strong></li>
+                    <li>Root Directory: <code>frontend</code></li>
+                    <li>Keep Build/Install commands as default.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>Step 3: Define Environment Variables on Vercel</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>We tell our React files where our Render API backend lies.</p>
+        </div>
+        <ul>
+            <li>Add the key-value pair under Environment Variables:
+                <ul>
+                    <li>Key: <code>VITE_API_URL</code></li>
+                    <li>Value: <code>https://barber-app-backend.onrender.com</code> (your Render Web Service URL)</li>
+                </ul>
+            </li>
+            <li>Click <strong>Deploy</strong>.</li>
+        </ul>
+
+        <h2>⚙️ Phase 2: Deploying Backend to Render</h2>
+
+        <h3>Step 4: Create Render Web Service</h3>
+        <ul>
+            <li>On Render dashboard, click <strong>New +</strong> &rarr; <strong>Web Service</strong>.</li>
+            <li>Connect your GitHub repository.</li>
+        </ul>
+
+        <h3>Step 5: Configure Build Settings</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Instructs Render on how to navigate to the Node folder, install packages, and boot the server.</p>
+        </div>
+        <ul>
+            <li>Root Directory: <code>backend</code></li>
+            <li>Runtime: <strong>Node</strong></li>
+            <li>Instance Type: <strong>Free</strong></li>
+            <li>Build Command: <code>npm install</code></li>
+            <li>Start Command: <code>npm start</code> (triggers <code>node server.js</code>)</li>
+        </ul>
+
+        <h3>Step 6: Add Backend Env Variables</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Connects your MongoDB Atlas database and sets up your sessions, tokens, and email keys securely.</p>
+        </div>
+        <ul>
+            <li>Add the following keys under Environment Variables:
+                <ul>
+                    <li><code>PORT</code> &rarr; <code>5000</code></li>
+                    <li><code>MONGO_URI</code> &rarr; <code>mongodb+srv://competeujjwal_db_user:...@cluster0...</code></li>
+                    <li><code>JWT_SECRET</code> &rarr; <code>MY_JWT_SECRET</code></li>
+                    <li><code>JWT_REFRESH_SECRET</code> &rarr; <code>your_refresh_secret</code></li>
+                    <li><code>FRONTEND_URL</code> &rarr; <code>https://barber-app-frontend.vercel.app</code> (your Vercel App URL)</li>
+                    <li><code>SMTP_USER</code> / <code>SMTP_PASS</code> (for Gmail credentials)</li>
+                </ul>
+            </li>
+            <li>Click <strong>Create Web Service</strong>.</li>
+        </ul>
+
+        <h2>🔄 CI/CD Update Process</h2>
+        <div class="why-box">
+            <strong>Why it's convenient:</strong>
+            <p>Whenever you push local changes to GitHub, Vercel and Render automatically detect the changes, pull the updates, rebuild, and redeploy your live site automatically.</p>
+        </div>
+        <pre><code># Make changes on your laptop, then run:
+git add .
+git commit -m "update project details"
+git push origin main</code></pre>
+    </div>
+</body>
+</html>

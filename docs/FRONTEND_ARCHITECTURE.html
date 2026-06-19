@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balor — Frontend System Architecture & Design Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #3b82f6; /* Blue theme for Frontend */
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --alert-blue-bg: #eff6ff;
+            --alert-blue-border: #bfdbfe;
+            --alert-blue-text: #1e40af;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-top: 40px;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 0.96rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.88rem;
+            border: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .why-box {
+            background-color: var(--alert-blue-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .why-box strong {
+            color: var(--alert-blue-text);
+        }
+
+        .why-box p {
+            margin: 5px 0 0 0;
+            color: var(--alert-blue-text);
+            font-size: 0.92rem;
+        }
+
+        .faq-item {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 8px 0;
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.94rem;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            pre {
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+            .why-box {
+                background: #f1f5f9;
+                border-left: 4px solid #475569;
+            }
+            .why-box p, .why-box strong {
+                color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Balor — Frontend System Architecture & Design Guide</h1>
+        <p>This guide details the complete frontend implementation of the Balor grooming booking system, detailing all folder layouts, state management flows, dynamic components, responsive features, and API integrations.</p>
+
+        <h2>1. Folder Architecture & Entry Points</h2>
+        <p>The frontend is a Single Page Application (SPA) built with <strong>React 18</strong>, <strong>React Router v6</strong>, and <strong>Vite</strong>.</p>
+
+        <h3>Directory Structure</h3>
+        <pre><code>frontend/
+├── public/
+│   └── _redirects           # Netlify client-side routing fallback configuration
+├── src/
+│   ├── api/
+│   │   └── axios.js         # Axios HTTP client equipped with JWT refresh interceptors
+│   ├── components/
+│   │   ├── ErrorBoundary.jsx # React class-based client crash fallback screen
+│   │   ├── LoadingSkeleton.jsx # Shimmer effect placeholder card
+│   │   ├── Navbar.jsx       # Header bar and responsive mobile navigation drawer
+│   │   ├── NotificationBell.jsx # Polling notification indicator dropdown
+│   │   ├── Pagination.jsx   # Tabular lists page controller
+│   │   └── ProtectedRoute.jsx # Role-based route guard
+│   ├── context/
+│   │   ├── AuthContext.jsx  # Customer sessions and user profile states
+│   │   └── ThemeContext.jsx # Dark/Light theme toggles
+│   ├── pages/
+│   │   ├── Login.jsx        # Login page containing password reset state machine
+│   │   ├── Register.jsx     # Registration forms with Indian phone number validator
+│   │   ├── Profile.jsx      # Personal information updates and role badges
+│   │   ├── user/
+│   │   │   ├── Salons.jsx       # Salon search cards, filters, and Quick Book row
+│   │   │   ├── SalonDetail.jsx  # Salon info page, operating statuses, and barber profiles
+│   │   │   ├── BookingForm.jsx  # Segmented time-slots, smart add-ons, and booking submissions
+│   │   │   └── MyBookings.jsx   # Booking lists, cancels, and reviews modals
+│   │   ├── barber/
+│   │   │   ├── Dashboard.jsx    # Barber bookings lists, earnings charts, and OTP completion modals
+│   │   │   └── Availability.jsx # Barber working slots toggles and holidays calendar
+│   │   ├── shop/
+│   │   │   └── Dashboard.jsx    # Shop profile editor, service lists, and reviews modals
+│   │   └── admin/
+│   │       └── Dashboard.jsx    # Platform graphs, salons manager, and user tables
+│   ├── utils/
+│   │   └── status.js        # Active salon checks (Open/Closed) and time formatters
+│   ├── App.jsx              # Main routing hub and global boundaries setup
+│   ├── index.css            # Custom CSS variables, responsive grids, and typography
+│   ├── main.jsx             # React DOM root entry point
+│   └── vercel.json          # Vercel client-side routing fallback configuration</code></pre>
+
+        <h2>2. Global State & Context Providers</h2>
+        <p>Balor uses two primary React Context Providers to maintain global state:</p>
+
+        <h3>A. Authentication Context (<code>AuthContext.jsx</code>)</h3>
+        <ul>
+            <li><strong>Purpose:</strong> Tracks active user profile information (<code>auth</code>), handles initial profile loading, and coordinates login/logout processes.</li>
+            <li><strong>Session Persistence:</strong> Reads initial session token from <code>localStorage</code> on boot.</li>
+            <li><strong>Logout flow:</strong> Clears local storage variables and local state:</li>
+        </ul>
+        <pre><code>const logout = async () => {
+  try {
+    await api.post('/auth/logout'); // Clears secure HTTP-only refresh cookie
+  } catch (err) {
+    console.error('Server logout failed:', err);
+  } finally {
+    localStorage.clear();
+    setAuth(null);
+  }
+};</code></pre>
+        <ul>
+            <li><strong>Name Dynamic Update:</strong> Updates the user's display name in local storage and active context dynamically when changed via the profile edit form:</li>
+        </ul>
+        <pre><code>const updateAuthName = (newName) => {
+  localStorage.setItem('name', newName);
+  setAuth((prev) => prev ? { ...prev, name: newName } : null);
+};</code></pre>
+
+        <h3>B. Theme Context (<code>ThemeContext.jsx</code>)</h3>
+        <ul>
+            <li><strong>Purpose:</strong> Controls the light/dark theme state.</li>
+            <li><strong>Mechanism:</strong> Toggles a <code>.dark-theme</code> class on the <code>document.documentElement</code> element, which swaps root CSS variables (e.g. <code>--bg</code>, <code>--text</code>, <code>--border</code>) instantly. Persists choice inside <code>localStorage</code>.</li>
+        </ul>
+
+        <h3>C. Axios Client & Token Interceptors (<code>api/axios.js</code>)</h3>
+        <div class="why-box">
+            <strong>Axios Token Handling:</strong>
+            <p>Axios attaches access tokens to outgoing requests and intercepts expired sessions automatically, performing a silent token refresh using the secure HttpOnly cookie.</p>
+        </div>
+        <pre><code>const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  withCredentials: true // Permits secure HttpOnly refresh cookie transmission
+});
+
+// 1. Request Interceptor: Attaches JWT Access Token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// 2. Response Interceptor: Silent Token Refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+  failedQueue = [];
+};
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const { data } = await api.post('/auth/refresh'); // Requests new access token
+        localStorage.setItem('token', data.accessToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        
+        processQueue(null, data.accessToken);
+        return api(originalRequest); // Retries failed request
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        // If refresh fails, session is dead -> force log out
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+    return Promise.reject(error);
+  }
+);</code></pre>
+
+        <h2>3. Navigation & Route Security</h2>
+
+        <h3>A. Protected Route Guard (<code>ProtectedRoute.jsx</code>)</h3>
+        <p>Guards frontend routes from unauthorized access. Supports role arrays for multi-role page access:</p>
+        <pre><code>export default function ProtectedRoute({ children, role }) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+
+  if (!token || !user) {
+    return &lt;Navigate to="/login" replace /&gt;;
+  }
+
+  if (role) {
+    const rolesArray = Array.isArray(role) ? role : [role];
+    if (!rolesArray.includes(user.role)) {
+      return &lt;Navigate to="/" replace /&gt;;
+    }
+  }
+
+  return children;
+}</code></pre>
+
+        <h3>B. Responsive Hamburger Drawer Navigation (<code>Navbar.jsx</code>)</h3>
+        <ul>
+            <li><strong>Desktop Layout:</strong> Renders navbar links and profile controls horizontally.</li>
+            <li><strong>Mobile Layout:</strong> Hides links on viewports <code>&lt;= 768px</code>. Displays a hamburger menu button to slide in a custom sidebar drawer.</li>
+            <li><strong>Persistent Utilities:</strong> Keeps the theme switch toggle, notification bell, and user avatar directly visible on the top header bar across all viewport sizes.</li>
+        </ul>
+
+        <h2>4. Page Architecture & Custom Features</h2>
+
+        <h3>A. Visual Time-Slot Picker</h3>
+        <p>Slots are rendered in interactive grid blocks categorized into Morning, Afternoon, and Evening thresholds. They style dynamically as available (clickable, green), booked/passed (disabled, grey), or fast-filling (orange).</p>
+
+        <h3>B. Smart Service Add-ons & Up-selling Cart</h3>
+        <p>Displays additional services in a dashed container. Clicking an add-on recalculates prices and durations inline, and triggers a dynamic request to update available slots.</p>
+
+        <h3>C. "Quick Book Again" Avatar Row & Drawer</h3>
+        <p>Enables repeat customers to re-book. Circular avatars show recently booked barbers. Clicking slides in a right-hand prefilled drawer to complete a booking in seconds.</p>
+
+        <h3>D. Collapsible Search Filters (<code>Salons.jsx</code>)</h3>
+        <p>Replaces index filter rows with a collapsible filter grid on mobile viewports. Selected parameters turn red with bold borders showing how many active tags are applied.</p>
+
+        <h3>E. Global React Error Boundary</h3>
+        <p>A class component implementation that catches children crashes. Placed wrapping page routes so the navbar stays accessible while rendering a custom crash layout.</p>
+
+        <h3>F. Developer Test Mode OTP Banner</h3>
+        <p>When the backend returns a <code>testOtp</code> code (signifying missing server SMTP configurations), the client catches it and renders a styled help banner, allowing instant testing without active email connections.</p>
+
+        <h2>5. Frontend Technical & System Design FAQ</h2>
+        <div class="faq-item">
+            <p class="faq-question">Q1: Explain how the Axios interceptor handles JWT refresh tokens silently.</p>
+            <p class="faq-answer"><strong>Answer:</strong> When an API request fails with a 401 Unauthorized status, the response interceptor halts further requests, requests a new access token via <code>POST /auth/refresh</code>, saves it to localStorage, updates headers, and retries the failed requests.</p>
+        </div>
+        <div class="faq-item">
+            <p class="faq-question">Q2: Why is it important to prevent request duplication when multiple requests fail with 401 simultaneously?</p>
+            <p class="faq-answer"><strong>Answer:</strong> If a page makes multiple concurrent API calls and all fail with a 401, triggering a refresh for each would result in race conditions. We solve this using a boolean lock flag (<code>isRefreshing</code>) and queueing all concurrent failed requests into a queue array until the refresh completes.</p>
+        </div>
+        <div class="faq-item">
+            <p class="faq-question">Q3: What is the benefit of using class-based Error Boundaries in React?</p>
+            <p class="faq-answer"><strong>Answer:</strong> They catch runtime JavaScript crashes in their child component tree, rendering fallback UIs instead of letting the entire page go blank. This can only be done in class components as hooks do not support lifecycle hooks like <code>componentDidCatch</code> yet.</p>
+        </div>
+        <div class="faq-item">
+            <p class="faq-question">Q4: How does the "Quick Book" drawer prefill data to optimize booking times?</p>
+            <p class="faq-answer"><strong>Answer:</strong> By fetching the logged-in user profile asynchronously from <code>/users/me</code> on mount and pre-populating fields like the phone number, allowing checkout in fewer clicks.</p>
+        </div>
+        <div class="faq-item">
+            <p class="faq-question">Q5: How do you handle dark mode styling variables in this project?</p>
+            <p class="faq-answer"><strong>Answer:</strong> We override CSS Custom Properties defined under <code>:root</code> with a <code>.dark-theme</code> class appended to the document root element, toggled dynamically by the Theme Context.</p>
+        </div>
+    </div>
+</body>
+</html>

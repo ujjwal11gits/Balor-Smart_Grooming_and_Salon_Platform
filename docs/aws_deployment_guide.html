@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive AWS EC2 Deployment Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #f97316;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --alert-blue-bg: #eff6ff;
+            --alert-blue-border: #bfdbfe;
+            --alert-blue-text: #1e40af;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 40px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 30px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .why-box {
+            background-color: var(--alert-blue-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .why-box strong {
+            color: var(--alert-blue-text);
+        }
+
+        .why-box p {
+            margin: 5px 0 0 0;
+            color: var(--alert-blue-text);
+            font-size: 0.95rem;
+        }
+
+        .placeholder-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .placeholder-table th, .placeholder-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .placeholder-table th {
+            background-color: #f1f5f9;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background-color: #dcfce7;
+            color: #15803d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            pre {
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+            .why-box {
+                background: #f1f5f9;
+                border-left: 4px solid #475569;
+            }
+            .why-box p, .why-box strong {
+                color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive AWS EC2 Deployment Guide</h1>
+        <p>Node.js (Express) + React (Vite) + MongoDB (Cloud Atlas) setup on a virtual server.</p>
+
+        <h2>🛠️ Prerequisites</h2>
+        <ul>
+            <li>An active AWS Account.</li>
+            <li>Git Bash (for Windows) or Terminal (macOS/Linux).</li>
+            <li>Your code pushed to a GitHub repository.</li>
+            <li>A cloud database (e.g., MongoDB Atlas).</li>
+        </ul>
+
+        <h2>📋 General Placeholders vs. Project Examples</h2>
+        <table class="placeholder-table">
+            <thead>
+                <tr>
+                    <th>Placeholder</th>
+                    <th>What it represents</th>
+                    <th>Project Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>&lt;your-ip&gt;</code></td>
+                    <td>AWS Server Public IP</td>
+                    <td><code>35.154.20.254</code></td>
+                </tr>
+                <tr>
+                    <td><code>&lt;your-key.pem&gt;</code></td>
+                    <td>AWS Key file</td>
+                    <td><code>./ujjwal_domain.pem</code></td>
+                </tr>
+                <tr>
+                    <td><code>&lt;your-project-folder&gt;</code></td>
+                    <td>Folder name on server</td>
+                    <td><code>Balor-Smart_Grooming_and_Salon_Platform</code></td>
+                </tr>
+                <tr>
+                    <td><code>&lt;your-domain&gt;</code></td>
+                    <td>Your custom subdomain</td>
+                    <td><code>balor.ujjwalchoubey.me</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+        <h2>🚀 Phase 1: Setting up the Virtual Machine</h2>
+
+        <h3>Step 1: Launch the EC2 Instance</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>We rent a remote virtual computer in the cloud running 24/7. Choosing Ubuntu Server provides a lightweight, standard Linux OS to run Node and host React.</p>
+        </div>
+        <ul>
+            <li>Open the AWS Console, search for <strong>EC2</strong>, and click <strong>Launch Instance</strong>.</li>
+            <li>Name: <code>balor-salon-server</code></li>
+            <li>OS Image: <strong>Ubuntu</strong> (Ubuntu Server 24.04 LTS, Free tier eligible).</li>
+            <li>Instance Type: <code>t3.micro</code> or <code>t2.micro</code>.</li>
+            <li>Key Pair: Select <code>ujjwal_domain</code> (or create a new one).</li>
+            <li>Firewall Settings: Allow **SSH**, **HTTP**, and **HTTPS** traffic from anywhere.</li>
+            <li>Storage: Keep default <code>8 GiB</code>.</li>
+            <li>Click <strong>Launch</strong> and copy the <strong>Public IPv4 IP</strong>.</li>
+        </ul>
+
+        <h3>Step 2: Connect to the Server via SSH</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Connects your local machine's terminal securely to the cloud server's terminal.</p>
+        </div>
+        <p>Open Git Bash in your project directory and run:</p>
+        <pre><code>ssh -i ./ujjwal_domain.pem ubuntu@35.154.20.254</code></pre>
+
+        <h3>Step 3: Prepare the Server Environment</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Updates packages and installs Node.js runtime and PM2 process manager so your backend runs 24/7.</p>
+        </div>
+        <pre><code># Update packages
+sudo apt update
+
+# Fetch Node v20 repository
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+# Install Node.js
+sudo apt install -y nodejs
+
+# Install PM2 Process Manager
+sudo npm install -g pm2</code></pre>
+
+        <h2>📦 Phase 2: Deploying the Application Code</h2>
+
+        <h3>Step 4: Clone the Project</h3>
+        <pre><code>git clone https://github.com/ujjwal11gits/Balor-Smart_Grooming_and_Salon_Platform.git</code></pre>
+
+        <h3>Step 5: Configure & Start the Backend</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Sets up backend packages, creates the hidden <code>.env</code> configurations, and tells PM2 to run the Express API in the background.</p>
+        </div>
+        <pre><code>cd Balor-Smart_Grooming_and_Salon_Platform/backend && npm install
+
+# Write environment variables
+cat << 'EOF' > .env
+PORT=5000
+MONGO_URI=mongodb+srv://competeujjwal_db_user:i.am.11.using.mongoDB@cluster0.sbr0vyp.mongodb.net/Balor_DB?appName=Cluster0
+JWT_SECRET=MY_JWT_SECRET
+JWT_REFRESH_SECRET=your_refresh_secret_change_in_production
+FRONTEND_URL=https://balor.ujjwalchoubey.me
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=ujjwalakash11@gmail.com
+SMTP_PASS=kjkyvljqxuxuaqav
+SESSION_EXPIRY_DAYS=30
+EOF
+
+# Start backend service
+pm2 start server.js --name "balor-backend"</code></pre>
+
+        <h3>Step 6: Build the Frontend</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Vite compiles React JS, JSX, and CSS files into a high-performance static folder called <code>dist</code>.</p>
+        </div>
+        <pre><code>cd ../frontend && npm install
+npm run build</code></pre>
+
+        <h2>🌐 Phase 3: Routing Traffic with Nginx</h2>
+
+        <h3>Step 7: Install and Configure Nginx</h3>
+        <div class="why-box">
+            <strong>Why we do this:</strong>
+            <p>Configures a web server to listen for requests to <code>balor.ujjwalchoubey.me</code>, serve frontend HTML/CSS files directly, and proxy all <code>/api</code> calls to Node.js on port 5000.</p>
+        </div>
+        <pre><code># Install Nginx
+sudo apt install -y nginx
+
+# Edit Configuration
+sudo tee /etc/nginx/sites-available/default << 'EOF'
+server {
+    listen 80;
+    server_name balor.ujjwalchoubey.me www.balor.ujjwalchoubey.me;
+
+    root /home/ubuntu/Balor-Smart_Grooming_and_Salon_Platform/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+EOF
+
+# Give access and restart Nginx
+chmod 755 /home/ubuntu
+sudo nginx -t
+sudo systemctl restart nginx</code></pre>
+
+        <h2>🛡️ Phase 4: Persistence & Updating the App</h2>
+
+        <h3>Step 8: Persistent Process Setup</h3>
+        <pre><code>pm2 startup
+# (Run the command generated in the terminal, then save)
+pm2 save</code></pre>
+
+        <h3>Step 9: Pushing Code Updates</h3>
+        <p>To deploy changes in one command, create a <code>deploy.sh</code> script inside <code>/home/ubuntu/Balor-Smart_Grooming_and_Salon_Platform</code>:</p>
+        <pre><code>#!/bin/bash
+git pull
+cd backend && npm install && pm2 restart balor-backend
+cd ../frontend && npm install && npm run build
+echo "Deploy Complete!"</code></pre>
+        <p>Run using <code>./deploy.sh</code>.</p>
+    </div>
+</body>
+</html>
