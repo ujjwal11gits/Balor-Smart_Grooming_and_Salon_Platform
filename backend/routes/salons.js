@@ -18,7 +18,9 @@ router.get('/', async (req, res) => {
       ];
     }
     
-    let salons = await Salon.find(filter).populate('ownerId', 'name email phone');
+    let salons = await Salon.find(filter).populate('ownerId', 'name email phone'); // important to populate owner info
+
+    // console.log(salons);
     
     // Fetch all barbers for these salons to dynamically calculate the correct rating
     const salonIds = salons.map(s => s._id);

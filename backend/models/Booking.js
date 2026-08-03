@@ -29,6 +29,7 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
 bookingSchema.index({ userId: 1 });
 bookingSchema.index({ barberId: 1 });
 bookingSchema.index({ salonId: 1 });

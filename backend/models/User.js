@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Here we hash the password before saving the user document to the database. This ensures that the password is stored securely and not in plain text. 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);

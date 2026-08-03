@@ -1,5 +1,5 @@
-const dns = require('dns');
-dns.setServers(['8.8.8.8']);
+const dns = require('dns'); // google dns ip
+dns.setServers(['8.8.8.8']); //
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -14,7 +14,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Set secure HTTP headers
-app.use(helmet());
+app.use(helmet()); // Hides teck stacks from response, prevent clickjacking, Stopping Cross-Site Scripting
 
 // Restrict CORS in production (clean trailing slash if present)
 let allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -30,7 +30,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Rate limiting for auth routes to prevent abuse
-const authLimiter = rateLimit({
+const authLimiter = rateLimit({//Fixed window rate limit algorithm is used
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 30, // limit each IP to 30 requests per windowMs
   message: { message: 'Too many requests from this IP, please try again after 15 minutes.' }
