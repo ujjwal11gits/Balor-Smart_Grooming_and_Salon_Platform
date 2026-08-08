@@ -15,7 +15,8 @@ async function getOwnedSalon(userId) {
   return salon;
 }
 
-// GET /api/shop/my-salon  — get own salon info + barbers
+// Returns the logged-in shop owner's salon details and its barbers.
+// This is the main read endpoint for the shop dashboard header and profile view.
 router.get('/my-salon', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -27,7 +28,8 @@ router.get('/my-salon', ...guard, async (req, res) => {
   }
 });
 
-// PUT /api/shop/my-salon  — update own salon info
+// Updates the logged-in shop owner's salon details.
+// Also updates the owner's name in the User model if a new owner name is provided.
 router.put('/my-salon', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -59,15 +61,16 @@ router.put('/my-salon', ...guard, async (req, res) => {
   }
 });
 
-// GET /api/shop/bookings?page=1&limit=10  — bookings for own salon
-router.get('/bookings', ...guard, async (req, res) => {
+// Returns paginated bookings for the logged-in shop owner's salon.
+// It includes customer and barber details for each booking.
+router.get('/bookings', ...guard, async (req, res) => { // padhna hai...
   try {
     const salon = await getOwnedSalon(req.user.id);
     if (!salon) return res.status(404).json({ message: 'No salon found for this account' });
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, parseInt(req.query.limit) || 10);
-    const total = await Booking.countDocuments({ salonId: salon._id });
+    const total = await Booking.countDocuments({ salonId: salon._id }); //countDoc kya hai?
     const bookings = await Booking.find({ salonId: salon._id })
       .populate('userId', 'name email phone')
       .populate('barberId', 'name')
@@ -81,7 +84,8 @@ router.get('/bookings', ...guard, async (req, res) => {
   }
 });
 
-// PATCH /api/shop/bookings/:id/status  — update a booking's status
+// Updates the status of a booking that belongs to the shop owner's salon.
+// It also validates completion OTPs and cancellation reasons when required.
 router.patch('/bookings/:id/status', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -128,7 +132,8 @@ router.patch('/bookings/:id/status', ...guard, async (req, res) => {
   }
 });
 
-// POST /api/shop/barbers  — add a barber to own salon
+// Creates a new barber under the logged-in shop owner's salon.
+// After saving, it syncs the barber into the salon's embedded barber list.
 router.post('/barbers', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -149,7 +154,8 @@ router.post('/barbers', ...guard, async (req, res) => {
   }
 });
 
-// PUT /api/shop/barbers/:id  — update a barber in own salon
+// Updates a barber that belongs to the logged-in shop owner's salon.
+// After saving, it keeps the salon's embedded barber copy in sync.
 router.put('/barbers/:id', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -172,7 +178,8 @@ router.put('/barbers/:id', ...guard, async (req, res) => {
   }
 });
 
-// DELETE /api/shop/barbers/:id  — remove a barber from own salon
+// Removes a barber from the logged-in shop owner's salon.
+// It deletes the barber record and removes the embedded salon copy too.
 router.delete('/barbers/:id', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -189,7 +196,8 @@ router.delete('/barbers/:id', ...guard, async (req, res) => {
   }
 });
 
-// GET /api/shop/stats  — quick stats for dashboard overview
+// Returns dashboard summary stats for the logged-in shop owner's salon.
+// Includes bookings, barbers, revenue, status breakdowns, leaderboard, and peak hours.
 router.get('/stats', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);

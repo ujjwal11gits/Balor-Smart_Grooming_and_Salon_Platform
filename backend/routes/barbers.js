@@ -5,7 +5,8 @@ const Salon = require('../models/Salon');
 const { protect, requireRole } = require('../middleware/auth');
 const { upsertSalonBarber, removeSalonBarber } = require('../utils/salonBarberSync');
 
-// GET /api/barbers/:id/available-slots?date=YYYY-MM-DD
+// Returns the open time slots for a barber on a specific date.
+// It excludes unavailable dates and any slots already booked.
 router.get('/:id/available-slots', async (req, res) => {
   try {
     const barber = await Barber.findById(req.params.id);
@@ -67,7 +68,8 @@ router.get('/:id/available-slots', async (req, res) => {
   }
 });
 
-// GET /api/barbers/:id
+// Returns a single barber by ID with salon details populated.
+// Used to load the barber profile and related salon information.
 router.get('/:id', async (req, res) => {
   try {
     const barber = await Barber.findById(req.params.id).populate('salonId', 'name address services phone openingTime closingTime');
@@ -78,7 +80,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/barbers/working-slots  — barber updates their own working slots + unavailable dates
+// Lets a logged-in barber update their own working slots and unavailable dates.
+// The update is matched by the current user's barber record.
 router.put('/working-slots', protect, requireRole('barber'), async (req, res) => {
   try {
     const barber = await Barber.findOneAndUpdate(
@@ -92,18 +95,20 @@ router.put('/working-slots', protect, requireRole('barber'), async (req, res) =>
   }
 });
 
-// POST /api/barbers  — admin only
+// Creates a new barber record.
+// After saving, it syncs the barber into the related salon document.
 router.post('/', protect, requireRole('admin'), async (req, res) => {
   try {
     const barber = await Barber.create(req.body);
-    await upsertSalonBarber(Salon, barber);
+    await upsertSalonBarber(Salon, barber); // use the function upsertSalonBarber from utils/salonBarberSync.js to update the salon's barbers array
     res.status(201).json(barber);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// PUT /api/barbers/:id  — admin only
+// Updates an existing barber record by ID.
+// After updating, it keeps the salon's embedded barber data in sync.
 router.put('/:id', protect, requireRole('admin'), async (req, res) => {
   try {
     const barber = await Barber.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -114,7 +119,8 @@ router.put('/:id', protect, requireRole('admin'), async (req, res) => {
   }
 });
 
-// DELETE /api/barbers/:id  — admin only
+// Deletes a barber record by ID.
+// If the barber belongs to a salon, it removes the embedded copy there too.
 router.delete('/:id', protect, requireRole('admin'), async (req, res) => {
   try {
     const barber = await Barber.findById(req.params.id);

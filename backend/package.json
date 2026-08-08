@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node dev-server.js",
+    "dev": "nodemon dev-server.js",
     "seed": "node dev-server.js --seed"
   },
   "dependencies": {

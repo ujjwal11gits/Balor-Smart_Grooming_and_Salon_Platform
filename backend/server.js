@@ -35,17 +35,18 @@ const authLimiter = rateLimit({//Fixed window rate limit algorithm is used
   max: 30, // limit each IP to 30 requests per windowMs
   message: { message: 'Too many requests from this IP, please try again after 15 minutes.' }
 });
+
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/verify-otp', authLimiter);
 app.use('/api/auth/forgot-password-otp', authLimiter);
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/salons', require('./routes/salons'));
-app.use('/api/barbers', require('./routes/barbers'));
+app.use('/api/auth', require('./routes/auth'));  // ☑️  
+app.use('/api/salons', require('./routes/salons')); // ☑️
+app.use('/api/barbers', require('./routes/barbers')); //  ☑️
 app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/admin', require('./routes/admin')); 
 app.use('/api/shop', require('./routes/shop'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/notifications', require('./routes/notifications'));

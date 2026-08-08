@@ -290,7 +290,7 @@ router.post("/forgot-password", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.json({
-        message: "Please enter a valid mail that you use while register",
+        message: "Please Enter a valid Mail",
       });
     }
 

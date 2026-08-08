@@ -5,12 +5,16 @@ const User = require('../models/User');
 const Booking = require('../models/Booking');
 const { protect, requireRole } = require('../middleware/auth');
 
-// GET /api/salons?search=&city=
+// API to list all salons with search and city filters
 router.get('/', async (req, res) => {
   try {
     const { search, city } = req.query;
     const filter = {};
+    
+    // Case-insensitive search for salon names
     if (search) filter.name = { $regex: search, $options: 'i' };
+    
+    // Filter by city or address if provided
     if (city) {
       filter.$or = [
         { address: { $regex: city, $options: 'i' } },
@@ -18,15 +22,14 @@ router.get('/', async (req, res) => {
       ];
     }
     
-    let salons = await Salon.find(filter).populate('ownerId', 'name email phone'); // important to populate owner info
+    // Find salons and attach basic owner details
+    let salons = await Salon.find(filter).populate('ownerId', 'name email phone'); 
 
-    // console.log(salons);
-    
-    // Fetch all barbers for these salons to dynamically calculate the correct rating
     const salonIds = salons.map(s => s._id);
+    // Fetch all barbers belonging to the filtered salons
     const allBarbers = await Barber.find({ salonId: { $in: salonIds } });
     
-    // Group barbers by salon
+    // Map barbers to their respective salons for easy access
     const barbersBySalon = {};
     allBarbers.forEach(b => {
       const sId = String(b.salonId);
@@ -34,18 +37,20 @@ router.get('/', async (req, res) => {
       barbersBySalon[sId].push(b);
     });
 
-    // Fetch active bookings for today for live queue calculations
+    // Define time range for 'Today' to calculate current queue
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
+    // Get all pending or confirmed bookings for these salons today
     const activeBookingsAll = await Booking.find({
       salonId: { $in: salonIds },
       date: { $gte: todayStart, $lte: todayEnd },
       status: { $in: ['pending', 'confirmed'] }
     });
 
+    // Group bookings by salon
     const bookingsBySalon = {};
     activeBookingsAll.forEach(b => {
       const sId = String(b.salonId);
@@ -53,16 +58,21 @@ router.get('/', async (req, res) => {
       bookingsBySalon[sId].push(b);
     });
 
+    // Process each salon to add calculated fields
     salons = salons.map(s => {
       const salonBarbers = barbersBySalon[String(s._id)] || [];
       const salonBookings = bookingsBySalon[String(s._id)] || [];
+      
+      // Calculate max rating from the barber team
       const maxRating = salonBarbers.length > 0
         ? Math.max(...salonBarbers.map(b => b.rating || 0))
         : 0;
+        
       const numBarbers = Math.max(1, salonBarbers.length);
+      // Estimate wait time (assuming 30 mins per service)
       const estWaitMins = Math.round((salonBookings.length * 30) / numBarbers);
 
-      const obj = s.toObject();
+      const obj = s.toObject(); // Convert Mongoose doc to plain object
       obj.avgRating = Number(maxRating.toFixed(1));
       obj.liveQueue = {
         activeCount: salonBookings.length,
@@ -71,6 +81,7 @@ router.get('/', async (req, res) => {
       return obj;
     });
 
+    // Sort by rating (or recency if city is filtered)
     if (!city) {
       salons.sort((a, b) => b.avgRating - a.avgRating);
     } else {
@@ -83,20 +94,18 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/salons/:id  — salon + its barbers
+// API to get a single salon's full profile and its barbers
 router.get('/:id', async (req, res) => {
   try {
     const salon = await Salon.findById(req.params.id);
     if (!salon) return res.status(404).json({ message: 'Salon not found' });
     
-    // Always fetch from Barber collection to get the most up-to-date ratings
     const barbers = await Barber.find({ salonId: req.params.id });
     
     const maxRating = barbers.length > 0
       ? Math.max(...barbers.map(b => b.rating || 0))
       : 0;
       
-    // Fetch active bookings for today for live queue calculations
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
@@ -124,7 +133,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/salons  — admin only
+// Create new salon (Restricted to Admins)
 router.post('/', protect, requireRole('admin'), async (req, res) => {
   try {
     const salon = await Salon.create(req.body);
@@ -134,7 +143,7 @@ router.post('/', protect, requireRole('admin'), async (req, res) => {
   }
 });
 
-// PUT /api/salons/:id  — admin only
+// Update salon details (Restricted to Admins)
 router.put('/:id', protect, requireRole('admin'), async (req, res) => {
   try {
     const salon = await Salon.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -144,7 +153,7 @@ router.put('/:id', protect, requireRole('admin'), async (req, res) => {
   }
 });
 
-// DELETE /api/salons/:id  — admin only
+// Remove a salon (Restricted to Admins)
 router.delete('/:id', protect, requireRole('admin'), async (req, res) => {
   try {
     await Salon.findByIdAndDelete(req.params.id);
@@ -153,5 +162,6 @@ router.delete('/:id', protect, requireRole('admin'), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 module.exports = router;
