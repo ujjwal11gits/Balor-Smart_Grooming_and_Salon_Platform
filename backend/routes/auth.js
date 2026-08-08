@@ -5,6 +5,8 @@ const User = require("../models/User");
 const Salon = require("../models/Salon");
 const { sendMail, sendMailBackground } = require("../utils/mailer");
 
+// Creates a short-lived access token used for normal API requests.
+// It carries the user's id, role, and name for authorization and UI state.
 const signAccess = (user) =>
   jwt.sign(
     { id: user._id, role: user.role, name: user.name },
@@ -14,6 +16,8 @@ const signAccess = (user) =>
     },
   );
 
+// Creates a longer-lived refresh token used to renew access tokens.
+// This keeps the session alive without forcing the user to log in again.
 const signRefresh = (user) => {
   const days = process.env.SESSION_EXPIRY_DAYS || "30";
   return jwt.sign(
@@ -25,6 +29,8 @@ const signRefresh = (user) => {
   );
 };
 
+// Returns the cookie settings used when storing refresh tokens in the browser.
+// The options keep the cookie secure and available for cross-site frontend requests.
 const getCookieOptions = () => {
   const days = Number(process.env.SESSION_EXPIRY_DAYS) || 30;
   return {
@@ -35,7 +41,8 @@ const getCookieOptions = () => {
   };
 };
 
-// you can use GET method to register, find out why you use POST method??
+// Registers a new user and starts email verification with an OTP.
+// If the role is shop, it also creates or updates the linked salon record.
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
   try {
@@ -151,6 +158,8 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// Authenticates a verified user and returns access details.
+// It also issues a refresh token cookie for session renewal.
 // POST /api/auth/login
 router.post("/login", async (req, res) => {
   try {
@@ -194,6 +203,8 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Verifies the registration OTP and completes account activation.
+// On success, it marks the user verified and returns login tokens.
 // POST /api/auth/verify-otp  — Step 2: verify OTP, return full token
 router.post("/verify-otp", async (req, res) => {
   try {
@@ -251,6 +262,8 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
+// Uses the refresh token cookie to issue a new access token.
+// This lets the client stay logged in without re-entering credentials.
 // POST /api/auth/refresh
 router.post("/refresh", async (req, res) => {
   try {
@@ -273,6 +286,8 @@ router.post("/refresh", async (req, res) => {
   }
 });
 
+// Logs the user out by clearing the refresh token cookie.
+// It ends the browser session without deleting the account.
 // POST /api/auth/logout
 router.post("/logout", (req, res) => {
   res.clearCookie("refreshToken", {
@@ -283,6 +298,8 @@ router.post("/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
+// Starts the password reset flow using an email reset link.
+// It stores a hashed reset token and sends the user a reset URL.
 // POST /api/auth/forgot-password
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -316,6 +333,8 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
+// Completes the reset-link password update using the token from the URL.
+// It verifies the token, updates the password, and clears reset state.
 // POST /api/auth/reset-password/:token
 router.post("/reset-password/:token", async (req, res) => {
   try {
@@ -343,6 +362,8 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
+// Starts the password reset flow using an OTP sent to email.
+// It stores the OTP temporarily and returns a short-lived verification session.
 // POST /api/auth/forgot-password-otp
 router.post("/forgot-password-otp", async (req, res) => {
   try {
@@ -399,6 +420,8 @@ router.post("/forgot-password-otp", async (req, res) => {
   }
 });
 
+// Verifies the password reset OTP and issues a short-lived reset token.
+// The reset token is used to authorize the final password update step.
 // POST /api/auth/verify-reset-otp
 router.post("/verify-reset-otp", async (req, res) => {
   try {
@@ -445,6 +468,8 @@ router.post("/verify-reset-otp", async (req, res) => {
   }
 });
 
+// Finalizes the OTP-based password reset using the reset token.
+// It updates the password and clears any reset-related data.
 // POST /api/auth/reset-password-otp
 router.post("/reset-password-otp", async (req, res) => {
   try {

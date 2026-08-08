@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import { useAuth } from './context/AuthContext';
+import ChatbotWidget from './components/ChatbotWidget';
+
 import FeedbackTab from './components/FeedbackTab';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -36,6 +38,9 @@ function HomeRedirect() {
 export default function App() {
   const { auth } = useAuth();
   const location = useLocation();
+  const showChatbot = (
+    location.pathname === '/' && (!auth || auth.role === 'user')
+  ) || (auth?.role === 'shop' && location.pathname === '/shop/dashboard');
 
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password');
   const showFeedback = auth ? (auth.role !== 'admin') : isAuthPage;
@@ -44,6 +49,7 @@ export default function App() {
     <>
       <Navbar />
       {showFeedback && <FeedbackTab />}
+      {showChatbot && <ChatbotWidget role={auth?.role || 'guest'} />}
       <main>
         <ErrorBoundary>
           <Routes>

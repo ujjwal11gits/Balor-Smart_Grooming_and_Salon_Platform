@@ -1,0 +1,182 @@
+[
+  {
+    "role": "customer",
+    "question": "How do I book a service?",
+    "keywords": ["book", "booking", "new", "make", "create", "schedule", "reserve", "appointment", "how", "steps"],
+    "answer": "To book: Go to the 'Salons' page from the navbar, browse or search for a salon, click 'Book Now' on the salon card (or 'View barbers' to pick a specific barber), then on the booking page select your date, choose services, pick an available time slot, enter your phone number, and click 'Confirm Booking'. That's it — booked in seconds!"
+  },
+  {
+    "role": "customer",
+    "question": "How do I find a salon near me?",
+    "keywords": ["find", "search", "discover", "salon", "shop", "near", "location", "browse", "look"],
+    "answer": "Go to the 'Salons' page from the top navbar. You can search by shop name, address, or city. You can also filter by rating, price range, specific services (Haircut, Beard, Styling, etc.), and toggle between 'All Shops' and 'Favorites Only'."
+  },
+  {
+    "role": "customer",
+    "question": "How do I cancel a booking?",
+    "keywords": ["cancel", "cancellation", "remove", "delete", "undo", "booking"],
+    "answer": "Go to 'My Bookings' from the navbar. Find the booking you want to cancel (must be 'Pending' or 'Confirmed' status), click the 'Cancel' button, enter a cancellation reason (required), and confirm. Cancelled slots automatically notify users on the waitlist."
+  },
+  {
+    "role": "customer",
+    "question": "Can I reschedule a booking?",
+    "keywords": ["reschedule", "change", "modify", "move", "shift", "date", "time", "different"],
+    "answer": "Currently there's no direct reschedule option. You'll need to cancel your existing booking from 'My Bookings' and create a new one with your preferred date and time slot."
+  },
+  {
+    "role": "customer",
+    "question": "What is the Completion OTP?",
+    "keywords": ["otp", "completion", "code", "verify", "verification", "digit", "number"],
+    "answer": "When your booking is confirmed, you receive a 4-digit Completion OTP (visible in 'My Bookings'). After your service is done, the barber or shop owner will ask for this OTP to mark your booking as 'Completed'. It's a security feature to confirm the service was actually delivered."
+  },
+  {
+    "role": "customer",
+    "question": "How do I pay for services?",
+    "keywords": ["pay", "payment", "charge", "cost", "money", "fee", "cash", "card", "wallet", "price", "free"],
+    "answer": "Booking on Balor is completely free — no upfront payment needed! You pay directly at the shop after your service is completed. Payment methods accepted depend on the shop (typically cash, credit/debit cards, or digital wallets like Google Pay)."
+  },
+  {
+    "role": "customer",
+    "question": "How do I create an account or register?",
+    "keywords": ["register", "signup", "sign", "create", "account", "join", "new", "user"],
+    "answer": "Click 'Get Started' on the landing page or 'Register' from the navbar. Choose your role (Customer or Shop Owner), fill in your name, phone, email, and password. After submitting, you'll receive a 6-digit OTP on your email — enter it to verify your account and you're all set!"
+  },
+  {
+    "role": "customer",
+    "question": "How do I login?",
+    "keywords": ["login", "log", "sign", "signin", "enter", "access", "credentials"],
+    "answer": "Click 'Login' from the navbar, enter your registered email and password, and click 'Login'. You'll be redirected to the homepage (customers), shop dashboard (shop owners), or admin dashboard (admins) based on your role."
+  },
+  {
+    "role": "customer",
+    "question": "How do I reset my password?",
+    "keywords": ["password", "reset", "forgot", "change", "recover", "lost"],
+    "answer": "On the Login page, click 'Forgot password?', enter your email, and you'll receive a 6-digit OTP. Enter the OTP, then set your new password. Alternatively, you can use the link-based reset from the 'Forgot Password' page."
+  },
+  {
+    "role": "customer",
+    "question": "How do I leave a review for a barber?",
+    "keywords": ["review", "rating", "rate", "feedback", "star", "comment", "barber"],
+    "answer": "Go to 'My Bookings', find a booking with 'Completed' status, and click the '★ Leave Review' button. Select a star rating (1-5) and optionally write a comment. Your review will appear on the barber's public profile."
+  },
+  {
+    "role": "customer",
+    "question": "What if all time slots are booked?",
+    "keywords": ["waitlist", "wait", "full", "booked", "slots", "available", "no", "queue", "waiting"],
+    "answer": "If all slots on your chosen date are fully booked, you'll see a 'Join Waitlist for this date' button. Click it to get added to the waitlist. When a slot opens up (due to a cancellation), you'll receive a notification and email alert so you can book it!"
+  },
+  {
+    "role": "customer",
+    "question": "How do I add a barber or salon to favorites?",
+    "keywords": ["favorite", "favourite", "heart", "save", "like", "bookmark"],
+    "answer": "Click the heart icon (♥) on any barber card or salon page to toggle it as a favorite. Your favorites appear on your Dashboard page, and you can filter the Salons page to show 'Favorites Only'."
+  },
+  {
+    "role": "customer",
+    "question": "Where can I see my past bookings?",
+    "keywords": ["past", "history", "previous", "old", "earlier", "bookings", "completed"],
+    "answer": "Go to 'My Bookings' from the navbar — you'll see all your bookings including Pending, Confirmed, Completed, and Cancelled ones. Your Dashboard also shows a summary of your latest 4 bookings."
+  },
+  {
+    "role": "customer",
+    "question": "How do I view my dashboard?",
+    "keywords": ["dashboard", "panel", "home", "overview", "stats", "profile"],
+    "answer": "Click 'Dashboard' in the navbar. It shows your booking stats (Total, Pending, Confirmed, Completed), your profile info, favorite barbers and salons, and recent bookings. You can also quickly browse salons or manage bookings from there."
+  },
+  {
+    "role": "customer",
+    "question": "How do I contact a shop?",
+    "keywords": ["contact", "call", "phone", "reach", "email", "message", "talk", "support"],
+    "answer": "When you open a salon's detail page, you'll see their phone number listed in the header. You can also reach Balor support at ujjwalakash11@gmail.com or call +91 74639 37140."
+  },
+  {
+    "role": "customer",
+    "question": "What services are available?",
+    "keywords": ["services", "offering", "haircut", "trim", "shave", "spa", "facial", "beard", "styling", "available"],
+    "answer": "Services vary by salon! Common ones include Haircut, Beard Trim, Styling, Shave, Spa, and Facial. You can see the full service list with prices on each salon's detail page, and filter salons by specific services on the Salons page."
+  },
+  {
+    "role": "customer",
+    "question": "How does the Quick Book Again feature work?",
+    "keywords": ["quick", "book", "again", "recent", "repeat", "fast", "rebook"],
+    "answer": "On the Salons page, you'll see a 'Quick Book Again' section showing your recent and favorite barbers. Click on any of them to instantly open a booking side drawer without navigating away from the page — super fast for repeat bookings!"
+  },
+  {
+    "role": "customer",
+    "question": "How do I switch between dark mode and light mode?",
+    "keywords": ["dark", "light", "mode", "theme", "toggle", "switch", "night", "color"],
+    "answer": "Click the theme toggle icon (☀️/🌙) in the top-right area of the navbar. It switches between light and dark mode instantly."
+  },
+  {
+    "role": "customer",
+    "question": "How do I update my profile?",
+    "keywords": ["profile", "update", "edit", "change", "name", "phone", "avatar", "photo"],
+    "answer": "Click your profile avatar in the navbar (top-right) or go to '/profile'. From there you can update your name, phone number, and profile avatar."
+  },
+  {
+    "role": "customer",
+    "question": "How do I report a bug or give feedback?",
+    "keywords": ["bug", "report", "feedback", "issue", "problem", "error", "complaint"],
+    "answer": "You can use the Feedback tab visible on the side of the page, or on mobile, tap the '🪲 Report an Issue' button in the slide-out menu. Fill in the details and submit — the admin team will be alerted!"
+  },
+  {
+    "role": "shop",
+    "question": "How do I see today's bookings?",
+    "keywords": ["today", "schedule", "bookings", "current", "now"],
+    "answer": "Go to your Shop Dashboard (you're redirected there on login). The Overview tab shows Today's Bookings count, and the Bookings tab shows the full list with customer details, barber, time, service, and price."
+  },
+  {
+    "role": "shop",
+    "question": "How do I add or manage services?",
+    "keywords": ["service", "services", "add", "edit", "price", "manage", "offering"],
+    "answer": "In your Shop Dashboard, go to the 'Services' tab. You'll see all your current services with prices. Click 'Add Service' to create a new one (name + price in ₹), or click the edit/delete icons next to existing services to modify or remove them."
+  },
+  {
+    "role": "shop",
+    "question": "How do I add or remove barbers from my salon?",
+    "keywords": ["barber", "barbers", "add", "remove", "staff", "team", "employee", "hire"],
+    "answer": "In your Shop Dashboard, go to the 'Barbers' tab. Click 'Add Barber' and fill in the barber's name, specializations, bio, and photo URL. To remove a barber, click the delete icon on their card and confirm."
+  },
+  {
+    "role": "shop",
+    "question": "How do I confirm or cancel a customer's booking?",
+    "keywords": ["confirm", "cancel", "approve", "reject", "booking", "request", "pending"],
+    "answer": "In the 'Bookings' tab of your Shop Dashboard, you'll see pending booking requests. Click '✓ Confirm' to accept or '✕ Cancel' to decline (a cancellation reason is required). For confirmed bookings, you can also mark them as completed using the customer's Completion OTP."
+  },
+  {
+    "role": "shop",
+    "question": "How does the Completion OTP work for shop owners?",
+    "keywords": ["otp", "complete", "completion", "verify", "finish", "done"],
+    "answer": "When a confirmed booking's service is done, click '✓ Complete' on the booking. Click 'Send OTP' to email a 4-digit code to the customer. Ask the customer for the code and enter it to verify. This marks the booking as 'Completed'. If email fails, a fallback OTP is shown on screen for verbal verification."
+  },
+  {
+    "role": "shop",
+    "question": "How do I view analytics and revenue?",
+    "keywords": ["analytics", "revenue", "income", "earnings", "sales", "report", "stats", "performance"],
+    "answer": "In your Shop Dashboard, the Overview tab shows KPI metrics (Total Bookings, Revenue in ₹, etc.) and charts for bookings over the last 7 days. The 'Analytics' tab shows detailed insights including Top Performing Barber, Peak Time Slots, Barber Performance Leaderboard, and customer retention rates."
+  },
+  {
+    "role": "shop",
+    "question": "How do I edit my salon profile?",
+    "keywords": ["edit", "update", "profile", "salon", "shop", "name", "hours", "address", "description"],
+    "answer": "In the Overview tab of your Shop Dashboard, click '✏ Edit Profile'. You can update your salon name, owner name, address, city, state, ZIP, description, image URL, contact phone, and opening/closing hours."
+  },
+  {
+    "role": "shop",
+    "question": "How do I change my shop's opening hours?",
+    "keywords": ["hours", "time", "timing", "open", "close", "working", "schedule", "opening", "closing"],
+    "answer": "In your Shop Dashboard Overview, click '✏ Edit Profile'. Scroll to the Opening Time and Closing Time fields, update them, and save. Your salon's status badge (Open/Closed) will automatically update based on the current time vs your configured hours."
+  },
+  {
+    "role": "shop",
+    "question": "What happens when a customer cancels?",
+    "keywords": ["cancel", "cancellation", "customer", "waitlist", "notify", "alert"],
+    "answer": "When a customer cancels, their time slot is freed up and users on the waitlist for that date are automatically notified via notifications and email. The cancelled booking appears in your 'Completed & Cancelled' history with the cancellation reason and who cancelled."
+  },
+  {
+    "role": "shop",
+    "question": "How can I see my barbers' performance?",
+    "keywords": ["performance", "leaderboard", "barber", "best", "top", "rating", "retention"],
+    "answer": "Go to the 'Analytics' tab in your Shop Dashboard. You'll see a Barber Performance Leaderboard ranking barbers by total revenue, completed bookings, and customer repeat retention rate (%). You can also see each barber's reviews from their profile card in the 'Barbers' tab."
+  }
+]

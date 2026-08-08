@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon dev-server.js",
-    "seed": "node dev-server.js --seed"
+    "seed": "node dev-server.js --seed",
+    "embed-faq": "node scripts/embedFaq.js",
+    "postinstall": "npm run embed-faq"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,7 +19,8 @@
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1",
-    "nodemailer": "8.0.10"
+    "nodemailer": "8.0.10",
+    "@langchain/chroma": "^0.0.12"
   },
   "devDependencies": {
     "mongodb-memory-server": "11.2.0",

@@ -7,12 +7,16 @@ const Feedback = require('../models/Feedback');
 const { protect, requireRole } = require('../middleware/auth');
 const { notifyBookingStatusChange } = require('../utils/bookingAlerts');
 
+// Shared access guard for admin-only routes.
+// It requires the user to be logged in and have the admin role.
 const guard = [protect, requireRole('admin')];
 
+// Returns a high-level admin dashboard summary.
+// Includes total counts, revenue, booking trends, top barbers, and pending feedback.
 // GET /api/admin/stats
 router.get('/stats', ...guard, async (req, res) => {
   try {
-    const [totalBookings, totalUsers, totalSalons, totalBarbers, pendingFeedbackCount] = await Promise.all([
+    const [totalBookings, totalUsers, totalSalons, totalBarbers, pendingFeedbackCount] = await Promise.all([ // Promise.all runs all of these queries at the same time asynchronously.
       Booking.countDocuments(),
       User.countDocuments(),
       Salon.countDocuments(),
@@ -63,6 +67,8 @@ router.get('/stats', ...guard, async (req, res) => {
   }
 });
 
+// Returns paginated users for the admin panel.
+// *** Passwords are excluded from the response.
 // GET /api/admin/users?page=1&limit=10
 router.get('/users', ...guard, async (req, res) => {
   try {
@@ -80,6 +86,8 @@ router.get('/users', ...guard, async (req, res) => {
   }
 });
 
+// Deletes a user by ID.
+// This is an admin-level user management action.
 // DELETE /api/admin/users/:id
 router.delete('/users/:id', ...guard, async (req, res) => {
   try {
@@ -90,6 +98,8 @@ router.delete('/users/:id', ...guard, async (req, res) => {
   }
 });
 
+// Returns paginated bookings with optional search and status filters.
+// It can match customers, barbers, salons, and service names.
 // GET /api/admin/bookings?page=1&limit=10&search=...&status=...
 router.get('/bookings', ...guard, async (req, res) => {
   try {
@@ -140,6 +150,8 @@ router.get('/bookings', ...guard, async (req, res) => {
   }
 });
 
+// Updates the status of any booking as an admin.
+// It also validates completion OTPs and blocks invalid status changes.
 // PATCH /api/admin/bookings/:id/status
 router.patch('/bookings/:id/status', ...guard, async (req, res) => {
   try {
@@ -176,6 +188,8 @@ router.patch('/bookings/:id/status', ...guard, async (req, res) => {
   }
 });
 
+// Returns paginated customer feedback reports.
+// Each feedback item includes the submitting user details.
 // GET /api/admin/feedback?page=1&limit=10
 router.get('/feedback', ...guard, async (req, res) => {
   try {
@@ -193,6 +207,8 @@ router.get('/feedback', ...guard, async (req, res) => {
   }
 });
 
+// Updates the status of a feedback report.
+// Only valid admin feedback states are accepted.
 // PUT /api/admin/feedback/:id
 router.put('/feedback/:id', ...guard, async (req, res) => {
   try {
@@ -210,6 +226,8 @@ router.put('/feedback/:id', ...guard, async (req, res) => {
   }
 });
 
+// Deletes a feedback report by ID.
+// This removes the report from the admin queue.
 // DELETE /api/admin/feedback/:id
 router.delete('/feedback/:id', ...guard, async (req, res) => {
   try {
@@ -223,6 +241,8 @@ router.delete('/feedback/:id', ...guard, async (req, res) => {
   }
 });
 
+// Returns all users with the shop role.
+// This is useful for admin screens that need shop owner selection.
 // GET /api/admin/shop-owners
 router.get('/shop-owners', ...guard, async (req, res) => {
   try {

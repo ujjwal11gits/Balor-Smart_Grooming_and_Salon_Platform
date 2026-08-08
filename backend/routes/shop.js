@@ -155,7 +155,7 @@ router.post('/barbers', ...guard, async (req, res) => {
 });
 
 // Updates a barber that belongs to the logged-in shop owner's salon.
-// After saving, it keeps the salon's embedded barber copy in sync.
+// `PUT` is used here because it is treating the barber update as a full resource update, not just a tiny partial change
 router.put('/barbers/:id', ...guard, async (req, res) => {
   try {
     const salon = await getOwnedSalon(req.user.id);
@@ -165,11 +165,13 @@ router.put('/barbers/:id', ...guard, async (req, res) => {
     if (!barber) return res.status(404).json({ message: 'Barber not found or not in your salon' });
 
     const { name, specializations, bio, imageUrl, workingSlots } = req.body;
+
     barber.name = name ?? barber.name;
     barber.specializations = specializations ?? barber.specializations;
     barber.bio = bio ?? barber.bio;
     barber.imageUrl = imageUrl ?? barber.imageUrl;
     barber.workingSlots = workingSlots ?? barber.workingSlots;
+    
     await barber.save();
     await upsertSalonBarber(Salon, barber);
     res.json(barber);

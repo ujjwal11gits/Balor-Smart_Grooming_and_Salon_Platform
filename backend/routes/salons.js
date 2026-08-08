@@ -5,7 +5,8 @@ const User = require('../models/User');
 const Booking = require('../models/Booking');
 const { protect, requireRole } = require('../middleware/auth');
 
-// API to list all salons with search and city filters
+// Returns a list of salons with optional search and city filters.
+// It also adds live queue and rating data for each salon.
 router.get('/', async (req, res) => {
   try {
     const { search, city } = req.query;
@@ -94,7 +95,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// API to get a single salon's full profile and its barbers
+// Returns one salon by ID along with its barbers.
+// It also includes a live queue estimate and average rating summary.
 router.get('/:id', async (req, res) => {
   try {
     const salon = await Salon.findById(req.params.id);
@@ -133,7 +135,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create new salon (Restricted to Admins)
+// Creates a new salon record.
+// Only admins can use this endpoint.
 router.post('/', protect, requireRole('admin'), async (req, res) => {
   try {
     const salon = await Salon.create(req.body);
@@ -143,7 +146,8 @@ router.post('/', protect, requireRole('admin'), async (req, res) => {
   }
 });
 
-// Update salon details (Restricted to Admins)
+// Updates an existing salon by ID.
+// Only admins can modify salon details through this route.
 router.put('/:id', protect, requireRole('admin'), async (req, res) => {
   try {
     const salon = await Salon.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -153,7 +157,8 @@ router.put('/:id', protect, requireRole('admin'), async (req, res) => {
   }
 });
 
-// Remove a salon (Restricted to Admins)
+// Deletes a salon by ID.
+// Only admins can remove salons from the system.
 router.delete('/:id', protect, requireRole('admin'), async (req, res) => {
   try {
     await Salon.findByIdAndDelete(req.params.id);
