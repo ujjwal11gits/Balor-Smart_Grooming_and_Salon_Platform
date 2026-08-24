@@ -1,10 +1,15 @@
-// backend/routes/chatbot.route.js
 const express = require('express');
 const router = express.Router();
-const { getAnswer } = require('../services/faqService');
+const { getAnswer } = require('../services/faqService'); // returns answer for a question
 
 // Rate limiter: 10 requests per IP per minute
 const rateLimit = require('express-rate-limit');
+
+/**
+ * `chatLimiter` middleware
+ * - Protects the chatbot endpoint from abuse by limiting requests to 10 per
+ *   IP per minute and returns a friendly rate-limit message on excess.
+ */
 const chatLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
@@ -13,7 +18,13 @@ const chatLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// POST /api/chatbot  (mounted as app.use('/api/chatbot', ...))
+/**
+ * POST /api/chatbot
+ * - Accepts `{ question }` in the request body and returns `{ answer }`.
+ * - Validates the question is present and non-empty, applies `chatLimiter`.
+ * - Uses `getAnswer` from `faqService` to compute the response; returns
+ *   400 for missing input and 500 on internal errors.
+ */
 router.post('/', chatLimiter, async (req, res) => {
   const { question } = req.body;
   if (!question || !question.trim()) {
@@ -28,4 +39,5 @@ router.post('/', chatLimiter, async (req, res) => {
   }
 });
 
+// Export the router so this route can be mounted (typically at `/api/chatbot`).
 module.exports = router;

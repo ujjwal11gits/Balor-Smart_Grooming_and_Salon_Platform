@@ -23,7 +23,9 @@ const optionalAuth = (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
     } catch (err) {
+      //*****
       // Treat as guest if token is invalid or expired
+      //*****
     }
   }
   next();

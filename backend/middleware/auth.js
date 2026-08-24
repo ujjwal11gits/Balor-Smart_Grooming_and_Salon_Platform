@@ -1,6 +1,14 @@
 const jwt = require("jsonwebtoken");
 
-// Protects routes by validating JWT Bearer tokens in Authorization headers
+// Authentication middleware module
+// Provides helpers to protect routes and enforce role-based access.
+
+/**
+ * `protect` middleware
+ * - Validates a JWT Bearer token from the `Authorization` header.
+ * - Attaches decoded token payload to `req.user` and calls `next()`.
+ * - Returns 401 if no token or the token is invalid.
+ */
 const protect = (req, res, next) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer "))
@@ -15,9 +23,13 @@ const protect = (req, res, next) => {
   }
 };
 
-// Role-based access control middleware (e.g. admin, shop, user)
-const requireRole =
-  (...roles) =>
+/**
+ * `requireRole(...roles)` middleware factory
+ * - Returns middleware that checks `req.user.role` is one of allowed roles.
+ * - If the user's role is not allowed, responds with 403 Forbidden.
+ * - Useful for restricting endpoints to roles like `admin`, `user`, or `shop`.
+ */
+const requireRole = (...roles) =>
   (req, res, next) => {
     if (!roles.includes(req.user.role))
       return res.status(403).json({ message: "Forbidden" });

@@ -212,10 +212,11 @@ router.get('/feedback', ...guard, async (req, res) => {
 // PUT /api/admin/feedback/:id
 router.put('/feedback/:id', ...guard, async (req, res) => {
   try {
-    const { status } = req.body;
-    if (!['pending', 'reviewed', 'resolved'].includes(status)) {
+    const status = typeof req.body.status === 'string' ? req.body.status.trim() : '';
+    if (!status || !['pending', 'reviewed', 'resolved'].includes(status)) {
       return res.status(400).json({ message: 'Invalid feedback status.' });
     }
+
     const feedback = await Feedback.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!feedback) {
       return res.status(404).json({ message: 'Feedback report not found.' });

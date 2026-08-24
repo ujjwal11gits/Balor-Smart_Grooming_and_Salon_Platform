@@ -42,18 +42,18 @@ app.use('/api/auth/verify-otp', authLimiter);
 app.use('/api/auth/forgot-password-otp', authLimiter);
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));  // ☑️  
+app.use('/api/auth', require('./routes/auth'));  // ☑️ 
 app.use('/api/salons', require('./routes/salons')); // ☑️
-app.use('/api/barbers', require('./routes/barbers')); //  ☑️
+app.use('/api/barbers', require('./routes/barbers')); // ☑️
 app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/admin', require('./routes/admin')); 
-app.use('/api/shop', require('./routes/shop'));
-app.use('/api/reviews', require('./routes/reviews'));
-app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/waitlist', require('./routes/waitlist'));
-app.use('/api/feedback', require('./routes/feedback'));
-app.use('/api/chatbot', require('./routes/chatbot.route'));
+app.use('/api/admin', require('./routes/admin')); // ☑️
+app.use('/api/shop', require('./routes/shop')); // ☑️
+app.use('/api/reviews', require('./routes/reviews')); // ☑️
+app.use('/api/notifications', require('./routes/notifications')); // ☑️
+app.use('/api/users', require('./routes/users')); // ☑️
+app.use('/api/waitlist', require('./routes/waitlist')); // ☑️
+app.use('/api/feedback', require('./routes/feedback')); // review,it is not that mch clear
+app.use('/api/chatbot', require('./routes/chatbot.route')); // revisit geminiservice.js
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {

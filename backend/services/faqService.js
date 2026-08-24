@@ -73,10 +73,12 @@ const GOODBYE_RESPONSES = [
 ];
 
 function randomPick(arr) {
+  // return a random element from an array
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function matchesAny(query, patterns) {
+  // return true if any regex pattern matches the query
   return patterns.some(p => p.test(query));
 }
 
@@ -116,7 +118,7 @@ function scoreFaq(faq, queryTokens) {
 }
 
 /**
- * Get a chatbot answer for the user's question.
+ * Main: Get a chatbot answer for the user's question.
  */
 async function getAnswer(question) {
   const q = question.trim();

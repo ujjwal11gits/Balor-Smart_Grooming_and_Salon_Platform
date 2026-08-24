@@ -1,9 +1,17 @@
 const router = require('express').Router();
-const Waitlist = require('../models/Waitlist');
+const Waitlist = require('../models/Waitlist'); //stores requests to be notified when slots open for a date.
 const Barber = require('../models/Barber');
+
+// `protect` middleware: requires an authenticated user on the request.
 const { protect } = require('../middleware/auth');
 
-// POST /api/waitlist - Join waitlist
+/**
+ * POST /api/waitlist
+ * Adds the authenticated user to a barber's waitlist for a specific date.
+ * - Validates `barberId` and `date`, ensures the barber exists, and that the
+ *   user isn't already pending on the same date.
+ * - Creates a `Waitlist` entry and returns it.
+ */
 router.post('/', protect, async (req, res) => {
   try {
     const { barberId, date } = req.body;
@@ -15,6 +23,7 @@ router.post('/', protect, async (req, res) => {
     const waitDate = new Date(date);
     waitDate.setHours(0, 0, 0, 0);
 
+    // Check if the user is already on the waitlist for this barber and date
     const existing = await Waitlist.findOne({
       userId: req.user.id,
       barberId,
@@ -23,7 +32,8 @@ router.post('/', protect, async (req, res) => {
     });
 
     if (existing) return res.status(400).json({ message: 'You are already on the waitlist for this day' });
-
+    
+    // Create a new waitlist entry
     const waitlist = await Waitlist.create({
       userId: req.user.id,
       barberId,
@@ -36,7 +46,13 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// GET /api/waitlist/my - Get user's waitlisted entries
+  // GET /api/waitlist/my - Get user's waitlisted entries
+/**
+ * GET /api/waitlist/my
+ * Returns the authenticated user's waitlist entries.
+ * - Uses `protect` to require authentication.
+ * - Populates barber display fields (`name`, `imageUrl`) and sorts newest-first.
+ */
 router.get('/my', protect, async (req, res) => {
   try {
     const waitlists = await Waitlist.find({ userId: req.user.id })
@@ -48,4 +64,5 @@ router.get('/my', protect, async (req, res) => {
   }
 });
 
+// Export router so these endpoints can be mounted by the main app
 module.exports = router;

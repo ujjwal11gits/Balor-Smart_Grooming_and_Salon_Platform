@@ -3,6 +3,8 @@
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
+// THIS IS FOLLOWING NAIVE RAG ARCHITECTURE
+
 /**
  * Generate a chat completion from a prompt.
  * @param {string} prompt – full prompt (including context)
